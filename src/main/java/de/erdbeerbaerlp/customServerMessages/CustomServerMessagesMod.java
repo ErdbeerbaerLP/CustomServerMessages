@@ -29,7 +29,7 @@ public class CustomServerMessagesMod {
 	public void prePreInit(FMLConstructionEvent ev) {
 		CustomMessages.preInit();
 		final NetworkSystem s = new CustomNetworkSystem();
-		ObfuscationReflectionHelper.setPrivateValue(MinecraftServer.class, FMLCommonHandler.instance().getMinecraftServerInstance(), s, "networkSystem");
+		ObfuscationReflectionHelper.setPrivateValue(MinecraftServer.class, FMLCommonHandler.instance().getMinecraftServerInstance(), s, "networkSystem", "field_147144_o");
 
 	}
 	@Mod.EventHandler

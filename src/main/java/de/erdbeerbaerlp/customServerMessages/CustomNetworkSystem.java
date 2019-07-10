@@ -143,7 +143,7 @@ public class CustomNetworkSystem extends NetworkSystem {
 	private static Packet<?> modifyPacket(Packet<?> packetIn) {
 		if(packetIn instanceof SPacketChat) {
 			final SPacketChat msg = (SPacketChat) packetIn;
-			final ITextComponent com = ObfuscationReflectionHelper.getPrivateValue(SPacketChat.class, msg, "chatComponent");
+			final ITextComponent com = ObfuscationReflectionHelper.getPrivateValue(SPacketChat.class, msg, "chatComponent", "field_148919_a", "a");
 			if(com instanceof TextComponentTranslation) {
 				final TextComponentTranslation tct = (TextComponentTranslation) com;
 				final String player = tct.getUnformattedText().split(" ")[0];
@@ -163,8 +163,8 @@ public class CustomNetworkSystem extends NetworkSystem {
 		}
 		if(packetIn instanceof net.minecraft.network.play.server.SPacketDisconnect) {
 			final net.minecraft.network.play.server.SPacketDisconnect p = (net.minecraft.network.play.server.SPacketDisconnect) packetIn;
-			if(ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SPacketDisconnect.class, p, "reason") instanceof TextComponentTranslation) {
-				final TextComponentTranslation tct = (TextComponentTranslation) ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SPacketDisconnect.class, p, "reason");
+			if(ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SPacketDisconnect.class, p, "reason", "field_149167_a", "a") instanceof TextComponentTranslation) {
+				final TextComponentTranslation tct = (TextComponentTranslation) ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SPacketDisconnect.class, p, "reason", "field_149167_a", "a");
 				System.out.println(tct.getKey());
 				if(tct.getKey().equals("disconnect.timeout")) {
 					nextTimeout = true;
