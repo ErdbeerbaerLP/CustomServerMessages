@@ -102,7 +102,7 @@ public class CustomNetworkSystem extends NetworkSystem {
 						@Override
 						public void sendPacket(Packet<?> packetIn,
 								GenericFutureListener<? extends Future<? super Void>> listener,
-										GenericFutureListener<? extends Future<? super Void>>... listeners) {
+										@SuppressWarnings("unchecked") GenericFutureListener<? extends Future<? super Void>>... listeners) {
 							packetIn = CustomNetworkSystem.modifyPacket(packetIn);
 							super.sendPacket(packetIn, listener, listeners);
 						}
