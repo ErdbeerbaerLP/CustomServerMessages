@@ -2,6 +2,8 @@ package de.erdbeerbaerlp.customServerMessages;
 
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.eventbus.Subscribe;
+
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -13,6 +15,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
 @Mod(modid=CustomServerMessagesMod.MODID, version = CustomServerMessagesMod.VERSION, name = CustomServerMessagesMod.NAME, serverSideOnly = true, acceptableRemoteVersions = "*")
 @EventBusSubscriber
@@ -84,6 +87,11 @@ public class CustomServerMessagesMod {
 	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent ev) {
 
+	}
+	@Subscribe
+	public void onServerStarting(FMLServerStartingEvent event){
+		event.registerServerCommand(new ReloadCommand());
+		if(CustomMessages.HELP_LIST.length != 0) event.registerServerCommand(new HelpCommand());
 	}
 	@Mod.EventHandler
 	public void serverStarted(FMLServerStartedEvent ev) {

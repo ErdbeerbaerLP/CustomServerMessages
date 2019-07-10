@@ -168,10 +168,10 @@ public class CustomNetworkSystem extends NetworkSystem {
 				System.out.println(tct.getKey());
 				if(tct.getKey().equals("disconnect.timeout")) {
 					nextTimeout = true;
-					return new SPacketDisconnect(new TextComponentString("You timed out :("));
+					return new net.minecraft.network.play.server.SPacketDisconnect(new TextComponentString("You timed out :("));
 				}
 				if(tct.getKey().startsWith("multiplayer.disconnect.server_shutdown")){
-					return new SPacketDisconnect(new TextComponentString(CustomMessages.STOP_MSG));
+					return new net.minecraft.network.play.server.SPacketDisconnect(new TextComponentString(CustomMessages.STOP_MSG));
 				}
 			}
 		}
