@@ -1,7 +1,5 @@
 package de.erdbeerbaerlp.customServerMessages;
 
-import static de.erdbeerbaerlp.customServerMessages.LogHelper.error;
-
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.eventbus.Subscribe;
