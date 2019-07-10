@@ -39,7 +39,7 @@ import net.minecraft.network.ServerStatusResponse.Version;
 import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.server.SPacketDisconnect;
 import net.minecraft.network.play.server.SPacketChat;
-import net.minecraft.network.status.server.SPacketServerInfo;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.network.NetHandlerHandshakeTCP;
 import net.minecraft.util.LazyLoadBase;
 import net.minecraft.util.math.MathHelper;
@@ -65,7 +65,7 @@ public class CustomNetworkSystem extends NetworkSystem {
 			Class <? extends ServerSocketChannel > oclass;
 			LazyLoadBase <? extends EventLoopGroup > lazyloadbase;
 
-			if (Epoll.isAvailable() && this.mcServer.shouldUseNativeTransport())
+			if (Epoll.isAvailable() && CustomServerMessagesMod.settings.getBooleanProperty("use-native-transport", true))
 			{
 				oclass = EpollServerSocketChannel.class;
 				lazyloadbase = SERVER_EPOLL_EVENTLOOP;
@@ -112,19 +112,19 @@ public class CustomNetworkSystem extends NetworkSystem {
 					networkmanager.setNetHandler(new NetHandlerHandshakeTCP(CustomNetworkSystem.this.mcServer, networkmanager) {
 						@Override
 						public void processHandshake(C00Handshake c) {
+							if(MinecraftForge.MC_VERSION.equals("1.12.2"))
+								version = 340;
+							else if(MinecraftForge.MC_VERSION.equals("1.12.1"))
+								version = 338;
+							else if(MinecraftForge.MC_VERSION.equals("1.12"))
+								version = 335;
+							else
+								version = 0;
 							if(CustomServerMessagesMod.serverStarted) {
 								if(c.getRequestedState() == EnumConnectionState.STATUS && CustomMessages.CUSTOM_MOTD_ENABLED) {
-									if(MinecraftForge.MC_VERSION.equals("1.12.2"))
-										version = 340;
-									else if(MinecraftForge.MC_VERSION.equals("1.12.1"))
-										version = 338;
-									else if(MinecraftForge.MC_VERSION.equals("1.12"))
-										version = 335;
-									else
-										version = 0;
 									final ServerStatusResponse statusResp = server.getServerStatusResponse();
-									Players statusPlayers = new Players(server.getMaxPlayers(), server.getCurrentPlayerCount());
-									GameProfile[] playersIn = new GameProfile[]{new GameProfile(UUID.randomUUID(), 
+									final Players statusPlayers = new Players(server.getMaxPlayers(), server.getCurrentPlayerCount());
+									final GameProfile[] playersIn = new GameProfile[]{new GameProfile(UUID.randomUUID(), 
 											CustomMessages.CUSTOM_MOTD_PLAYER_HOVER
 											.replace("%online%", server.getCurrentPlayerCount()+"")
 											.replace("%max%", server.getMaxPlayers()+"")
@@ -132,7 +132,11 @@ public class CustomNetworkSystem extends NetworkSystem {
 											.replace("%playerlist%", getPlayerList())
 											)};
 									statusPlayers.setPlayers(playersIn);
-									statusResp.setVersion(new Version(CustomMessages.CUSTOM_MOTD_USE_VERSION?CustomMessages.CUSTOM_MOTD_VERSION:MinecraftForge.MC_VERSION, CustomMessages.CUSTOM_MOTD_USE_VERSION?Integer.MAX_VALUE:version));
+									statusResp.setVersion(new Version(CustomMessages.CUSTOM_MOTD_USE_VERSION?
+											CustomMessages.CUSTOM_MOTD_VERSION
+											.replace("%online%", server.getCurrentPlayerCount()+"")
+											.replace("%max%", server.getMaxPlayers()+"")
+											:MinecraftForge.MC_VERSION, CustomMessages.CUSTOM_MOTD_USE_VERSION?Integer.MAX_VALUE:version));
 									statusResp.setPlayers(statusPlayers);
 									statusResp.setServerDescription(new TextComponentString(CustomMessages.getRandomMOTD().replace("%online%", server.getCurrentPlayerCount()+"").replace("%max%", ""+server.getMaxPlayers())));
 									server.applyServerIconToResponse(statusResp);
@@ -141,27 +145,23 @@ public class CustomNetworkSystem extends NetworkSystem {
 							}
 							else
 							{
-								if(MinecraftForge.MC_VERSION.equals("1.12.2"))
-									version = 340;
-								else if(MinecraftForge.MC_VERSION.equals("1.12.1"))
-									version = 338;
-								else if(MinecraftForge.MC_VERSION.equals("1.12"))
-									version = 335;
-								else
-									version = 0;
-								final ServerStatusResponse statusResp = new ServerStatusResponse();
-								Players statusPlayers = new Players(-1, -1);
-								GameProfile[] playersIn = new GameProfile[]{new GameProfile(UUID.randomUUID(), CustomMessages.START_VERSION_HOVER)};
+								DedicatedServer.allowPlayerLogins = true; //allow the status message to show up
+								final ServerStatusResponse statusResp = server.getServerStatusResponse();
+								final Players statusPlayers = new Players(-1, -1);
+								final GameProfile[] playersIn = new GameProfile[]{new GameProfile(UUID.randomUUID(), CustomMessages.START_VERSION_HOVER)};
 								statusPlayers.setPlayers(playersIn);
 								statusResp.setVersion(new Version(CustomMessages.USE_VERSION?CustomMessages.START_VERSION:MinecraftForge.MC_VERSION, CustomMessages.USE_VERSION?Integer.MAX_VALUE:version));
 								statusResp.setPlayers(statusPlayers);
 								statusResp.setServerDescription(new TextComponentString(CustomMessages.START_MOTD));
-								if(CustomMessages.LOG_START_DISCONNECT) FMLLog.log.info("Disconnecting Player: Server is starting");
-								TextComponentString startKick = new TextComponentString(CustomMessages.START_KICK_MSG);
-								if(c.getRequestedState() == EnumConnectionState.STATUS) networkManager.sendPacket(new SPacketServerInfo(statusResp));
-								else if(c.getRequestedState() == EnumConnectionState.LOGIN) networkManager.sendPacket(new SPacketDisconnect(startKick));
-								else System.out.println("Invalid state: "+c.getRequestedState());
-								networkManager.closeChannel(startKick);
+								server.applyServerIconToResponse(statusResp);
+								final TextComponentString startKick = new TextComponentString(CustomMessages.START_KICK_MSG);
+								
+								if(c.getRequestedState() != EnumConnectionState.STATUS) {
+									if(CustomMessages.LOG_START_DISCONNECT) FMLLog.log.info("Disconnecting Player: Server is starting");
+									networkManager.sendPacket(new SPacketDisconnect(startKick));
+									networkManager.closeChannel(startKick);
+								}
+								super.processHandshake(c);
 							}
 						}
 

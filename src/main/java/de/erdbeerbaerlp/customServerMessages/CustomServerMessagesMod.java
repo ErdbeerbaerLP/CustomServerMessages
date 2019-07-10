@@ -8,9 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Logger;
 
-import com.google.common.eventbus.Subscribe;
-
-import net.minecraft.crash.CrashReport;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.PropertyManager;
@@ -19,7 +16,6 @@ import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -35,7 +31,7 @@ public class CustomServerMessagesMod {
 	static boolean serverStarted = false;
 	private static boolean preServer = true;
 	private static final Logger LOGGER = FMLLog.log;
-	private PropertyManager settings;
+	static PropertyManager settings;
 	private final NetworkSystem s = new CustomNetworkSystem();
 
 	{
@@ -43,12 +39,12 @@ public class CustomServerMessagesMod {
 		final MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
 		LOGGER.info("Loading properties");
-		this.settings = new PropertyManager(new File("server.properties"));
+		CustomServerMessagesMod.settings = new PropertyManager(new File("server.properties"));
 
 		ObfuscationReflectionHelper.setPrivateValue(MinecraftServer.class, server, s, "networkSystem", "field_147144_o");
 		InetAddress inetaddress = null;
-		final String ip = this.settings.getStringProperty("server-ip", "");
-		final int port = this.settings.getIntProperty("server-port", 25565);
+		final String ip = CustomServerMessagesMod.settings.getStringProperty("server-ip", "");
+		final int port = CustomServerMessagesMod.settings.getIntProperty("server-port", 25565);
 		if (!ip.isEmpty())
 		{
 			try {
@@ -82,10 +78,6 @@ public class CustomServerMessagesMod {
 		}.start();
 	}
 	@Mod.EventHandler
-	public void prePreInit(FMLConstructionEvent ev) {
-		System.out.println("constructionevent");
-	}
-	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent ev) {
 		Thread r = new Thread() {
 			@SuppressWarnings("static-access")
@@ -94,7 +86,7 @@ public class CustomServerMessagesMod {
 					while(true){
 						if(CustomMessages.DEV_AUTO_RELOAD_CONFIG_SEC != 0){
 							try {
-								this.sleep(TimeUnit.SECONDS.toMillis(CustomMessages.DEV_AUTO_RELOAD_CONFIG_SEC));
+								Thread.sleep(TimeUnit.SECONDS.toMillis(CustomMessages.DEV_AUTO_RELOAD_CONFIG_SEC));
 								CustomMessages.preInit();
 							} catch (InterruptedException e) {
 								// TODO Auto-generated catch block
@@ -126,7 +118,7 @@ public class CustomServerMessagesMod {
 	public void postInit(FMLPostInitializationEvent ev) {
 
 	}
-	@Subscribe
+	@Mod.EventHandler
 	public void onServerStarting(FMLServerStartingEvent event){
 		event.registerServerCommand(new ReloadCommand());
 		if(CustomMessages.HELP_LIST.length != 0) event.registerServerCommand(new HelpCommand());

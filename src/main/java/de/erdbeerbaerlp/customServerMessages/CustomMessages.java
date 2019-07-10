@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 public class CustomMessages {
 
@@ -99,7 +97,7 @@ public class CustomMessages {
 		serverStartingMotd.setComment("Writes an custom MOTD while server is starting\nOnly two lines will be displayed!");
 		
 		Property useStartVersion = config.get(CATEGORY_MESSAGES, "UseStartVersion", true);
-		useStartVersion.setComment("Enable override of version?\ntrue: Shows the custom message and enables hover message\nfalse: Shows -1/-1 players online -> Hover message does not work here");
+		useStartVersion.setComment("Enable override of version?\ntrue: Shows the custom message and enables hover message\nfalse: Shows -1/-1 players online");
 		
 		Property startVersion = config.get(CATEGORY_MESSAGES, "StartVersion", "\u00A74Starting...");
 		startVersion.setComment("The Message that will be displayed instead of -1/-1 Players");
