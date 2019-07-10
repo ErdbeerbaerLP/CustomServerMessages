@@ -124,7 +124,7 @@ public class CustomMessages {
 		helpMsg.setComment("A list of custom help messages to show instead of the vanilla /help command\nWhen there are multiple they get randomized\n\nLeave empty to disable\nDoes NOT enable/disable with /messagereload");
 		
 		Property useCustomMOTD = config.get(CATEGORY_MESSAGES, "Use Custom MOTD", true);
-		useStartVersion.setComment("Enable custom MOTD handling");
+		useCustomMOTD.setComment("Enable custom MOTD handling");
 		
 		Property customMOTDTexts = config.get(CATEGORY_MESSAGES, "Custom MOTDs", new String[] {"\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 players playing on YOURSERVER\\n\u00A73Join them now", "\u00A75Join our discord server:\\n\u00A75discord.gg/example", "Another random MOTD\\nReplace them in config/CustomMessages.cfg"});
 		customMOTDTexts.setComment("Modify the motd as you like\nMultiple Lines in this config will randomize the MOTDs\n\nSupports 2 lines (Use \\n for new line)\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count");
