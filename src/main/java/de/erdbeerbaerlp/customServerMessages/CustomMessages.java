@@ -135,7 +135,7 @@ public class CustomMessages {
 		Property customMOTDModifyVersion = config.get(CATEGORY_MESSAGES, "Custom MOTD Modify Version", false);
 		customMOTDModifyVersion.setComment("This will show custom text instead of the playercount.\nWARNING: This will also show, that the server is outdated, but players can still join!");
 		
-		Property customMOTDVersionText = config.get(CATEGORY_MESSAGES, "Custom MOTD Version", "");
+		Property customMOTDVersionText = config.get(CATEGORY_MESSAGES, "Custom MOTD Version", "\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 online!");
 		customMOTDVersionText.setComment("Text used for the custom version\n\nPlaceholders:\n%online% - Online player count\n%max% - Maximum player count");
 		
 		
