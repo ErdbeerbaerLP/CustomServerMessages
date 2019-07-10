@@ -40,7 +40,6 @@ import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.server.SPacketDisconnect;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.status.server.SPacketServerInfo;
-import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.network.NetHandlerHandshakeTCP;
 import net.minecraft.util.LazyLoadBase;
 import net.minecraft.util.math.MathHelper;
@@ -94,7 +93,7 @@ public class CustomNetworkSystem extends NetworkSystem {
 
 					p_initChannel_1_.pipeline().addLast("timeout", new ReadTimeoutHandler(net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.READ_TIMEOUT)).addLast("legacy_query", new LegacyPingHandler(CustomNetworkSystem.this)).addLast("splitter", new NettyVarint21FrameDecoder()).addLast("decoder", new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND)).addLast("prepender", new NettyVarint21FrameEncoder()).addLast("encoder", new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND));
 					NetworkManager networkmanager = new NetworkManager(EnumPacketDirection.SERVERBOUND) {
-						
+
 						@Override
 						public void sendPacket(Packet<?> packetIn) {
 							packetIn = CustomNetworkSystem.modifyPacket(packetIn);
@@ -103,7 +102,7 @@ public class CustomNetworkSystem extends NetworkSystem {
 						@Override
 						public void sendPacket(Packet<?> packetIn,
 								GenericFutureListener<? extends Future<? super Void>> listener,
-								GenericFutureListener<? extends Future<? super Void>>... listeners) {
+										GenericFutureListener<? extends Future<? super Void>>... listeners) {
 							packetIn = CustomNetworkSystem.modifyPacket(packetIn);
 							super.sendPacket(packetIn, listener, listeners);
 						}
@@ -113,7 +112,8 @@ public class CustomNetworkSystem extends NetworkSystem {
 					networkmanager.setNetHandler(new NetHandlerHandshakeTCP(CustomNetworkSystem.this.mcServer, networkmanager) {
 						@Override
 						public void processHandshake(C00Handshake c) {
-							if(CustomServerMessagesMod.serverStarted)
+							if(CustomServerMessagesMod.serverStarted) {
+								super.processHandshake(c);
 								if(c.getRequestedState() == EnumConnectionState.STATUS && CustomMessages.CUSTOM_MOTD_ENABLED) {
 									if(MinecraftForge.MC_VERSION.equals("1.12.2"))
 										version = 340;
@@ -138,7 +138,8 @@ public class CustomNetworkSystem extends NetworkSystem {
 									statusResp.setServerDescription(new TextComponentString(CustomMessages.getRandomMOTD().replace("%online%", server.getCurrentPlayerCount()+"").replace("%max%", ""+server.getMaxPlayers())));
 									server.applyServerIconToResponse(statusResp);
 									networkManager.sendPacket(new SPacketServerInfo(statusResp));
-								}else super.processHandshake(c);
+								}
+							}
 							else
 							{
 								if(MinecraftForge.MC_VERSION.equals("1.12.2"))
@@ -167,19 +168,19 @@ public class CustomNetworkSystem extends NetworkSystem {
 
 						private String getPlayerList() {
 							final GameProfile[] agameprofile = new GameProfile[Math.min(server.getCurrentPlayerCount(), 12)];
-				            int j = MathHelper.getInt(new Random(), 0, server.getCurrentPlayerCount() - agameprofile.length);
+							int j = MathHelper.getInt(new Random(), 0, server.getCurrentPlayerCount() - agameprofile.length);
 
-				            for (int k = 0; k < agameprofile.length; ++k)
-				            {
-				                agameprofile[k] = ((EntityPlayerMP)server.getPlayerList().getPlayers().get(j + k)).getGameProfile();
-				            }
+							for (int k = 0; k < agameprofile.length; ++k)
+							{
+								agameprofile[k] = ((EntityPlayerMP)server.getPlayerList().getPlayers().get(j + k)).getGameProfile();
+							}
 
-				            Collections.shuffle(Arrays.asList(agameprofile));
-				            String out = "";
-				            for(GameProfile p : agameprofile) {
-				            	out = out + p.getName();
-				            }
-				            return out;
+							Collections.shuffle(Arrays.asList(agameprofile));
+							String out = "";
+							for(GameProfile p : agameprofile) {
+								out = out + p.getName();
+							}
+							return out;
 						}
 					});
 				}
@@ -199,7 +200,7 @@ public class CustomNetworkSystem extends NetworkSystem {
 					leaveMsg.setStyle(tct.getStyle());
 					nextTimeout = false;
 					return new SPacketChat(leaveMsg, msg.getType());
-					
+
 				}
 				if(tct.getKey().startsWith("multiplayer.player.joined")){
 					final TextComponentString joinMsg = new TextComponentString(CustomMessages.JOIN_MSG.replace("%player%", player));
