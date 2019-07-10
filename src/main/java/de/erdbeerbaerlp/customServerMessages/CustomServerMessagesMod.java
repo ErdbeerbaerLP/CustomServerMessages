@@ -24,20 +24,17 @@ public class CustomServerMessagesMod {
 	public static final String NAME = "Custom Server Messages";
 	public static final String VERSION = "2.0.0";
 	protected static boolean serverStarted;
-//  Keeping that backup here, just in case
-	private NetworkSystem defSys;
+	//  Keeping that backup here, just in case
 	@Mod.EventHandler
 	public void prePreInit(FMLConstructionEvent ev) {
 		CustomMessages.preInit();
-		defSys = ObfuscationReflectionHelper.getPrivateValue(MinecraftServer.class, FMLCommonHandler.instance().getMinecraftServerInstance(), "networkSystem");
-		
 		final NetworkSystem s = new CustomNetworkSystem();
 		ObfuscationReflectionHelper.setPrivateValue(MinecraftServer.class, FMLCommonHandler.instance().getMinecraftServerInstance(), s, "networkSystem");
-	
+
 	}
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent ev) {
-		
+
 		Thread r = new Thread() {
 			@SuppressWarnings("static-access")
 			public void run() {
@@ -58,22 +55,6 @@ public class CustomServerMessagesMod {
 		r.setDaemon(true);
 		r.setPriority(Thread.MAX_PRIORITY);
 		r.start();
-//		new Thread() {
-//			public void run() {
-//				while(!serverStarted) {
-//					try {
-//						final ServerStatusResponse statusResp = FMLCommonHandler.instance().getMinecraftServerInstance().getServerStatusResponse();
-//						Players statusPlayers = new Players(-1, -1);
-//						GameProfile[] playersIn = new GameProfile[]{new GameProfile(UUID.randomUUID(), CustomMessages.START_VERSION_HOVER)};
-//						statusPlayers.setPlayers(playersIn);
-//						statusResp.setVersion(new Version(CustomMessages.USE_VERSION?CustomMessages.START_VERSION:MinecraftForge.MC_VERSION, CustomMessages.USE_VERSION?Integer.MAX_VALUE:version));
-//						statusResp.setPlayers(statusPlayers);
-//						statusResp.setServerDescription(new TextComponentString(CustomMessages.START_MOTD));
-//						((DedicatedServer)FMLServerHandler.instance().getServer()).allowPlayerLogins = true;
-//					}catch (Exception e) {}
-//				}
-//			};
-//		}.start();
 	}
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent ev) {
@@ -96,6 +77,5 @@ public class CustomServerMessagesMod {
 	@Mod.EventHandler
 	public void serverStarted(FMLServerStartedEvent ev) {
 		serverStarted = true;
-//		ObfuscationReflectionHelper.setPrivateValue(MinecraftServer.class, FMLCommonHandler.instance().getMinecraftServerInstance(), defSys, "networkSystem");
 	}
 }
