@@ -2,6 +2,9 @@ package de.erdbeerbaerlp.customServerMessages;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Random;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
@@ -19,6 +22,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.EnumConnectionState;
 import net.minecraft.network.EnumPacketDirection;
 import net.minecraft.network.LegacyPingHandler;
@@ -36,8 +40,10 @@ import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.server.SPacketDisconnect;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.status.server.SPacketServerInfo;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.network.NetHandlerHandshakeTCP;
 import net.minecraft.util.LazyLoadBase;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -108,7 +114,31 @@ public class CustomNetworkSystem extends NetworkSystem {
 						@Override
 						public void processHandshake(C00Handshake c) {
 							if(CustomServerMessagesMod.serverStarted)
-								super.processHandshake(c);
+								if(c.getRequestedState() == EnumConnectionState.STATUS && CustomMessages.CUSTOM_MOTD_ENABLED) {
+									if(MinecraftForge.MC_VERSION.equals("1.12.2"))
+										version = 340;
+									else if(MinecraftForge.MC_VERSION.equals("1.12.1"))
+										version = 338;
+									else if(MinecraftForge.MC_VERSION.equals("1.12"))
+										version = 335;
+									else
+										version = 0;
+									ServerStatusResponse statusResp = new ServerStatusResponse();
+									Players statusPlayers = new Players(server.getMaxPlayers(), server.getCurrentPlayerCount());
+									GameProfile[] playersIn = new GameProfile[]{new GameProfile(UUID.randomUUID(), 
+											CustomMessages.CUSTOM_MOTD_PLAYER_HOVER
+											.replace("%current%", server.getCurrentPlayerCount()+"")
+											.replace("%max%", server.getMaxPlayers()+"")
+											.replace("%gamemode%", server.getGameType().getName())
+											.replace("%playerlist%", getPlayerList())
+											)};
+									statusPlayers.setPlayers(playersIn);
+									statusResp.setVersion(new Version(CustomMessages.CUSTOM_MOTD_USE_VERSION?CustomMessages.CUSTOM_MOTD_VERSION:MinecraftForge.MC_VERSION, CustomMessages.CUSTOM_MOTD_USE_VERSION?Integer.MAX_VALUE:version));
+									statusResp.setPlayers(statusPlayers);
+									statusResp.setServerDescription(new TextComponentString(CustomMessages.getRandomMOTD().replace("%online%", server.getCurrentPlayerCount()+"").replace("%max%", ""+server.getMaxPlayers())));
+									server.applyServerIconToResponse(statusResp);
+									networkManager.sendPacket(new SPacketServerInfo(statusResp));
+								}else super.processHandshake(c);
 							else
 							{
 								if(MinecraftForge.MC_VERSION.equals("1.12.2"))
@@ -133,6 +163,23 @@ public class CustomNetworkSystem extends NetworkSystem {
 								else System.out.println("Invalid state: "+c.getRequestedState());
 								networkManager.closeChannel(startKick);
 							}
+						}
+
+						private String getPlayerList() {
+							final GameProfile[] agameprofile = new GameProfile[Math.min(server.getCurrentPlayerCount(), 12)];
+				            int j = MathHelper.getInt(new Random(), 0, server.getCurrentPlayerCount() - agameprofile.length);
+
+				            for (int k = 0; k < agameprofile.length; ++k)
+				            {
+				                agameprofile[k] = ((EntityPlayerMP)server.getPlayerList().getPlayers().get(j + k)).getGameProfile();
+				            }
+
+				            Collections.shuffle(Arrays.asList(agameprofile));
+				            String out = "";
+				            for(GameProfile p : agameprofile) {
+				            	out = out + p.getName();
+				            }
+				            return out;
 						}
 					});
 				}
@@ -166,10 +213,6 @@ public class CustomNetworkSystem extends NetworkSystem {
 			if(ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SPacketDisconnect.class, p, "reason", "field_149167_a", "a") instanceof TextComponentTranslation) {
 				final TextComponentTranslation tct = (TextComponentTranslation) ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SPacketDisconnect.class, p, "reason", "field_149167_a", "a");
 				System.out.println(tct.getKey());
-				if(tct.getKey().equals("disconnect.timeout")) {
-					nextTimeout = true;
-					return new net.minecraft.network.play.server.SPacketDisconnect(new TextComponentString("You timed out :("));
-				}
 				if(tct.getKey().startsWith("multiplayer.disconnect.server_shutdown")){
 					return new net.minecraft.network.play.server.SPacketDisconnect(new TextComponentString(CustomMessages.STOP_MSG));
 				}

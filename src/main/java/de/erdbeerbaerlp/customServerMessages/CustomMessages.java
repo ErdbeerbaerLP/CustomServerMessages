@@ -3,6 +3,7 @@ package de.erdbeerbaerlp.customServerMessages;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -28,7 +29,11 @@ public class CustomMessages {
 	public static String STOP_MSG;
 	public static String START_VERSION_HOVER;
 	public static String[] HELP_LIST;
-	
+	public static boolean CUSTOM_MOTD_ENABLED;
+	public static String[] CUSTOM_MOTDS;
+	public static boolean CUSTOM_MOTD_USE_VERSION;
+	public static String CUSTOM_MOTD_PLAYER_HOVER;
+	public static String CUSTOM_MOTD_VERSION;
 	//LOG
 	public static boolean LOG_START_DISCONNECT;
 	public static boolean LOG_CONFIG_RELOAD = true;
@@ -37,6 +42,7 @@ public class CustomMessages {
 	//DEV
 	public static int DEV_AUTO_RELOAD_CONFIG_SEC;
 	public static boolean DEV_DELAY_SERVER;
+
 	
 	
 	
@@ -117,7 +123,20 @@ public class CustomMessages {
 		Property helpMsg = config.get(CATEGORY_MESSAGES, "Help Messages", new String[] {});
 		helpMsg.setComment("A list of custom help messages to show instead of the vanilla /help command\nWhen there are multiple they get randomized\n\nLeave empty to disable\nDoes NOT enable/disable with /messagereload");
 		
+		Property useCustomMOTD = config.get(CATEGORY_MESSAGES, "Use Custom MOTD", true);
+		useStartVersion.setComment("Enable custom MOTD handling");
 		
+		Property customMOTDTexts = config.get(CATEGORY_MESSAGES, "Custom MOTDs", new String[] {"\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 players playing on YOURSERVER\\n\u00A73Join them now", "\u00A75Join our discord server:\\n\u00A75discord.gg/example", "Another random MOTD\\nReplace them in config/CustomMessages.cfg"});
+		customMOTDTexts.setComment("Modify the motd as you like\nMultiple Lines in this config will randomize the MOTDs\n\nSupports 2 lines (Use \\n for new line)\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count");
+		
+		Property customMOTDPlayerHover = config.get(CATEGORY_MESSAGES, "Custom MOTD PlayerHover", "\u00A76Welcome to YOURSERVER!\\n\u00A73There are \u00A7a%online%\u00A73 players online.\\n\\n\u00A7aOnline:\n\u00A72%playerlist%\n\u00A79\u00A7lHave Fun!");
+		customMOTDPlayerHover.setComment("The message you see when hovering over the player count in the server list\n\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count\n%playerlist% - A list of players like vanilla would display\n%gamemode% - The default gamemode of the server");
+		
+		Property customMOTDModifyVersion = config.get(CATEGORY_MESSAGES, "Custom MOTD Modify Version", false);
+		customMOTDModifyVersion.setComment("This will show custom text instead of the playercount.\nWARNING: This will also show, that the server is outdated, but players can still join!");
+		
+		Property customMOTDVersionText = config.get(CATEGORY_MESSAGES, "Custom MOTD Version", "");
+		customMOTDVersionText.setComment("Text used for the custom version\n\nPlaceholders:\n%online% - Online player count\n%max% - Maximum player count");
 		
 		
 		
@@ -162,6 +181,11 @@ public class CustomMessages {
 		propOrderMsgs.add(leaveTimeoutMsg.getName());
 		propOrderMsgs.add(stopMsg.getName());
 		propOrderMsgs.add(helpMsg.getName());
+		propOrderMsgs.add(useCustomMOTD.getName());
+		propOrderMsgs.add(customMOTDTexts.getName());
+		propOrderMsgs.add(customMOTDPlayerHover.getName());
+		propOrderMsgs.add(customMOTDModifyVersion.getName());
+		propOrderMsgs.add(customMOTDVersionText.getName());
 		config.setCategoryPropertyOrder(CATEGORY_MESSAGES, propOrderMsgs);
 		
 		
@@ -188,7 +212,11 @@ public class CustomMessages {
 			STOP_MSG = stopMsg.getString().replace("\\n", "\n");
 			START_VERSION_HOVER = startVersionHover.getString().replace("\\n", "\n");
 			HELP_LIST = helpMsg.getStringList();
-			
+			CUSTOM_MOTD_ENABLED = useCustomMOTD.getBoolean();
+			CUSTOM_MOTDS = customMOTDTexts.getStringList();
+			CUSTOM_MOTD_PLAYER_HOVER = customMOTDPlayerHover.getString().replace("\\n", "\n");
+			CUSTOM_MOTD_USE_VERSION = customMOTDModifyVersion.getBoolean();
+			CUSTOM_MOTD_VERSION = customMOTDVersionText.getString();
 			//LOG
 			LOG_START_DISCONNECT = logStartingDisconnect.getBoolean();
 			LOG_CONFIG_RELOAD = logConfigReload.getBoolean();
@@ -200,6 +228,10 @@ public class CustomMessages {
 		
 		if(config.hasChanged())
 			config.save();
+	}
+	private static final Random r = new Random();
+	public static String getRandomMOTD(){
+		return CustomMessages.CUSTOM_MOTDS[r.nextInt(CustomMessages.CUSTOM_MOTDS.length)].replace("\\n", "\n");
 	}
 	
 }
