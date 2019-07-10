@@ -126,7 +126,7 @@ public class CustomNetworkSystem extends NetworkSystem {
 									Players statusPlayers = new Players(server.getMaxPlayers(), server.getCurrentPlayerCount());
 									GameProfile[] playersIn = new GameProfile[]{new GameProfile(UUID.randomUUID(), 
 											CustomMessages.CUSTOM_MOTD_PLAYER_HOVER
-											.replace("%current%", server.getCurrentPlayerCount()+"")
+											.replace("%online%", server.getCurrentPlayerCount()+"")
 											.replace("%max%", server.getMaxPlayers()+"")
 											.replace("%gamemode%", server.getGameType().getName())
 											.replace("%playerlist%", getPlayerList())
