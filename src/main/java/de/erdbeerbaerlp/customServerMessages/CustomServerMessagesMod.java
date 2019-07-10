@@ -1,5 +1,7 @@
 package de.erdbeerbaerlp.customServerMessages;
 
+import static de.erdbeerbaerlp.customServerMessages.LogHelper.error;
+
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.eventbus.Subscribe;
@@ -58,11 +60,13 @@ public class CustomServerMessagesMod {
 	}
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent ev) {
-		try {
-			Thread.sleep(TimeUnit.SECONDS.toMillis(10));
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(CustomMessages.DEV_DELAY_SERVER){
+			try {
+				TimeUnit.SECONDS.sleep(9999);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				System.err.println("Got interrupted while delaying server");
+			}
 		}
 	}
 	@Mod.EventHandler
