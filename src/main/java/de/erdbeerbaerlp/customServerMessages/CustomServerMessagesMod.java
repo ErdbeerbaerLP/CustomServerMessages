@@ -48,7 +48,7 @@ public class CustomServerMessagesMod {
 								// TODO Auto-generated catch block
 								System.err.println("Error auto-reloading config: InterruptedException");
 							}
-						}else break;
+						}
 					}
 			}
 		};

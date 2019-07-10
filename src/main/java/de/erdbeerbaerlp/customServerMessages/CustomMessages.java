@@ -37,7 +37,6 @@ public class CustomMessages {
 	//DEV
 	public static int DEV_AUTO_RELOAD_CONFIG_SEC;
 	public static boolean DEV_DELAY_SERVER;
-	public static boolean DEV_DOUBLE_TIMEOUT_TIME;
 	
 	
 	
@@ -141,16 +140,12 @@ public class CustomMessages {
 		Property delayServerStart = config.get(CATEGORY_DEV, "DelayServerStart", false);
 		delayServerStart.setComment("Will delay the server start by 9999 seconds\nCan be used with ReloadConfigAfter to modify your StartMOTD and Version");
 		
-		Property doubleTimeoutTime = config.get(CATEGORY_DEV, "DoubleTimeoutTime", false);
-		doubleTimeoutTime.setComment("Setting this to true will double the timeout time of the server.\nHelpful if you always get timeouts while joining with many mods");
-		
 		
 		
 		//DEV
 		List<String> orderDev = new ArrayList<String>();
 		orderDev.add(reloadConfigAfter.getName());
 		orderDev.add(delayServerStart.getName());
-		orderDev.add(doubleTimeoutTime.getName());
 		config.setCategoryPropertyOrder(CATEGORY_DEV, orderDev);
 		
 		
@@ -201,7 +196,6 @@ public class CustomMessages {
 			//DEV
 			DEV_AUTO_RELOAD_CONFIG_SEC = reloadConfigAfter.getInt();
 			DEV_DELAY_SERVER = delayServerStart.getBoolean();
-			DEV_DOUBLE_TIMEOUT_TIME = doubleTimeoutTime.getBoolean();
 		}
 		
 		if(config.hasChanged())
