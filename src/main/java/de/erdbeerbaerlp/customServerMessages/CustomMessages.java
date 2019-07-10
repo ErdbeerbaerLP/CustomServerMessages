@@ -96,7 +96,7 @@ public class CustomMessages {
 		Property startVersion = config.get(CATEGORY_MESSAGES, "StartVersion", "\u00A74Starting...");
 		startVersion.setComment("The Message that will be displayed instead of -1/-1 Players");
 		
-		Property startVersionHover = config.get(CATEGORY_MESSAGES, "StartVersion Hover", "\u00a74Server is starting\\n\u00a76Please wait \u00a72until the server has started completely\\n\u00a7cElse you will \u00a74not\u00a7c be able to join\\n\u00a7eIf you think this is an error contact the server team\\n\\n\u00a7a\u00a7nLinks:\\n\u00a7bSupport website: \u00a71http://example.com\\n\u00a75Discord server: \u00a71http://discord.gg/example");
+		Property startVersionHover = config.get(CATEGORY_MESSAGES, "StartVersion Hover", "\u00a74Server is starting\\n\u00a76Please wait until the server has started completely\\n\u00a7cElse you will \u00a74not\u00a7c be able to join\\n\u00a7eIf you think this is an error contact the server team\\n\\n\u00a7a\u00a7nLinks:\\n\u00a7bSupport website: \u00a71http://example.com\\n\u00a75Discord server: \u00a71http://discord.gg/example");
 		startVersionHover.setComment("Text that will be shows when you hover over the message you set in StartVersion");
 		
 		Property serverStartingKick = config.get(CATEGORY_MESSAGES, "serverStartingKick", "\u00a74This server is currently starting\\n\u00a7cPlease wait...");
@@ -115,7 +115,7 @@ public class CustomMessages {
 		stopMsg.setComment("The message you get when the server stops\n\nVanilla: Server closed\nDefault: "+stopMsg.getDefault());
 		
 		Property helpMsg = config.get(CATEGORY_MESSAGES, "Help Messages", new String[] {});
-		helpMsg.setComment("A list of custom help messages to show instead of the vanilla /help command\nWhen there are multiple they get randomized\n\nLeave empty to disable\nDoes NOT work with /messagereload");
+		helpMsg.setComment("A list of custom help messages to show instead of the vanilla /help command\nWhen there are multiple they get randomized\n\nLeave empty to disable\nDoes NOT enable/disable with /messagereload");
 		
 		
 		
