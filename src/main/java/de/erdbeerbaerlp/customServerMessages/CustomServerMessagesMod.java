@@ -1,12 +1,21 @@
 package de.erdbeerbaerlp.customServerMessages;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.eventbus.Subscribe;
 
+import net.minecraft.crash.CrashReport;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.PropertyManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -23,18 +32,61 @@ public class CustomServerMessagesMod {
 	public static final String MODID = "servermsgs";
 	public static final String NAME = "Custom Server Messages";
 	public static final String VERSION = "2.0.0";
-	protected static boolean serverStarted;
-	//  Keeping that backup here, just in case
+	static boolean serverStarted = false;
+	private static boolean preServer = true;
+	private static final Logger LOGGER = FMLLog.log;
+	private PropertyManager settings;
+	private final NetworkSystem s = new CustomNetworkSystem();
+
+	{
+		CustomMessages.preInit();
+		final MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+
+		LOGGER.info("Loading properties");
+		this.settings = new PropertyManager(new File("server.properties"));
+
+		ObfuscationReflectionHelper.setPrivateValue(MinecraftServer.class, server, s, "networkSystem", "field_147144_o");
+		InetAddress inetaddress = null;
+		final String ip = this.settings.getStringProperty("server-ip", "");
+		final int port = this.settings.getIntProperty("server-port", 25565);
+		if (!ip.isEmpty())
+		{
+			try {
+				inetaddress = InetAddress.getByName(ip);
+			} catch (UnknownHostException e) {}
+		}
+		LOGGER.info("Starting Pre-Minecraft server on {}:{}", ip.isEmpty() ? "*" : ip, Integer.valueOf(port));
+
+		try
+		{
+			s.addLanEndpoint(inetaddress, port);
+		}
+		catch (IOException ioexception)
+		{
+			LOGGER.warn("**** FAILED TO BIND TO PORT!");
+			LOGGER.warn("The exception was: {}", (Object)ioexception.toString());
+			LOGGER.warn("Perhaps a server is already running on that port?");
+			preServer = false;
+			FMLCommonHandler.instance().exitJava(-1, true);
+		}
+		new Thread() {
+			{
+				setName("Early Network Handler");
+				setDaemon(true);
+			}
+			public void run() {
+				while(preServer) {
+					s.networkTick();
+				}
+			};
+		}.start();
+	}
 	@Mod.EventHandler
 	public void prePreInit(FMLConstructionEvent ev) {
-		CustomMessages.preInit();
-		final NetworkSystem s = new CustomNetworkSystem();
-		ObfuscationReflectionHelper.setPrivateValue(MinecraftServer.class, FMLCommonHandler.instance().getMinecraftServerInstance(), s, "networkSystem", "field_147144_o");
-
+		System.out.println("constructionevent");
 	}
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent ev) {
-
 		Thread r = new Thread() {
 			@SuppressWarnings("static-access")
 			public void run() {
@@ -55,9 +107,12 @@ public class CustomServerMessagesMod {
 		r.setDaemon(true);
 		r.setPriority(Thread.MAX_PRIORITY);
 		r.start();
+		preServer = false;
+		s.terminateEndpoints();
 	}
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent ev) {
+
 		if(CustomMessages.DEV_DELAY_SERVER){
 			try {
 				TimeUnit.SECONDS.sleep(9999);

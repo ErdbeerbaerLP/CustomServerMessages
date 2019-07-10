@@ -113,7 +113,6 @@ public class CustomNetworkSystem extends NetworkSystem {
 						@Override
 						public void processHandshake(C00Handshake c) {
 							if(CustomServerMessagesMod.serverStarted) {
-								super.processHandshake(c);
 								if(c.getRequestedState() == EnumConnectionState.STATUS && CustomMessages.CUSTOM_MOTD_ENABLED) {
 									if(MinecraftForge.MC_VERSION.equals("1.12.2"))
 										version = 340;
@@ -123,7 +122,7 @@ public class CustomNetworkSystem extends NetworkSystem {
 										version = 335;
 									else
 										version = 0;
-									ServerStatusResponse statusResp = new ServerStatusResponse();
+									final ServerStatusResponse statusResp = server.getServerStatusResponse();
 									Players statusPlayers = new Players(server.getMaxPlayers(), server.getCurrentPlayerCount());
 									GameProfile[] playersIn = new GameProfile[]{new GameProfile(UUID.randomUUID(), 
 											CustomMessages.CUSTOM_MOTD_PLAYER_HOVER
@@ -137,8 +136,8 @@ public class CustomNetworkSystem extends NetworkSystem {
 									statusResp.setPlayers(statusPlayers);
 									statusResp.setServerDescription(new TextComponentString(CustomMessages.getRandomMOTD().replace("%online%", server.getCurrentPlayerCount()+"").replace("%max%", ""+server.getMaxPlayers())));
 									server.applyServerIconToResponse(statusResp);
-									networkManager.sendPacket(new SPacketServerInfo(statusResp));
-								}
+									super.processHandshake(c);
+								}else if(c.getRequestedState() != EnumConnectionState.STATUS) super.processHandshake(c);
 							}
 							else
 							{
@@ -150,7 +149,7 @@ public class CustomNetworkSystem extends NetworkSystem {
 									version = 335;
 								else
 									version = 0;
-								ServerStatusResponse statusResp = new ServerStatusResponse();
+								final ServerStatusResponse statusResp = new ServerStatusResponse();
 								Players statusPlayers = new Players(-1, -1);
 								GameProfile[] playersIn = new GameProfile[]{new GameProfile(UUID.randomUUID(), CustomMessages.START_VERSION_HOVER)};
 								statusPlayers.setPlayers(playersIn);
