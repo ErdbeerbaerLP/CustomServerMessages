@@ -1,23 +1,26 @@
 package de.erdbeerbaerlp.customServerMessages;
 
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
-import net.minecraftforge.fml.common.Loader;
-
+@SuppressWarnings("DuplicatedCode")
 public class CustomMessages {
 
+	public static boolean doInit = false;
+	public static boolean initialized = false;
 	private static Configuration config = null;
 	//CATEGORIES
 	public static final String CATEGORY_MESSAGES = "Messages";
 	public static final String CATEGORY_LOG = "Log";
 	public static final String CATEGORY_DEV = "Developer options";
-	
-	
+
+
 	//MESSAGES
 	public static String START_VERSION;
 	public static boolean USE_VERSION;
@@ -34,26 +37,27 @@ public class CustomMessages {
 	public static boolean CUSTOM_MOTD_USE_VERSION;
 	public static String CUSTOM_MOTD_PLAYER_HOVER;
 	public static String CUSTOM_MOTD_VERSION;
+	public static String OUTDATED_SERVER;
+	public static String OUTDATED_CLIENT;
+
 	//LOG
 	public static boolean LOG_START_DISCONNECT;
 	public static boolean LOG_CONFIG_RELOAD = true;
-	
-	
+
+
 	//DEV
 	public static int DEV_AUTO_RELOAD_CONFIG_SEC;
 	public static boolean DEV_DELAY_SERVER;
 
 	
+
 	
-	
-	
-	
-	
-	public static void preInit(){
-		File configFile = new File(Loader.instance().getConfigDir(), "/CustomMessages.cfg");
+	public static void preInit() {
+		System.out.println("Loading CustomServerMessages configuration...");
+		File configFile = new File("./config/CustomMessages.cfg");
 		config = new Configuration(configFile);
 		syncFromFiles();
-		
+		System.out.println("Delay == " + DEV_DELAY_SERVER);
 	}
 	
 	public static Configuration getConfig(){
@@ -86,28 +90,27 @@ public class CustomMessages {
 			config.moveProperty(old, "Leave Message", CATEGORY_MESSAGES);
 			config.moveProperty(old, "Stop Message", CATEGORY_MESSAGES);
 			config.removeCategory(config.getCategory(old));
-			old = null;
 			System.out.println("Conversion done!");
 		}
 		config.setCategoryComment(CATEGORY_MESSAGES, "Theese messages should be visible to all players\n\nAny messages supports color codes\nMore infos about color codes here: http://bit.ly/mcformatting\nUse \\n for an new line, \u00a7k for unreadable text, \u00a7l for bold text, \u00a7m for strikethrough,\n\u00a7n for underlined text, \u00a7o for italics and \u00a7r to reset all formatting");
 		config.setCategoryComment(CATEGORY_LOG, "Stuff that will be logged, enable/disable or modify them here");
 		config.setCategoryComment(CATEGORY_DEV, "Useful to debug the mod\nThese should be set to disabled after done using it");
 		//VISIBLE MESSAGES
-		Property serverStartingMotd = config.get(CATEGORY_MESSAGES, "ServerStart MOTD", "\u00A74This Server is still Starting\\n\u00A7cPlease Wait...");
-		serverStartingMotd.setComment("Writes an custom MOTD while server is starting\nOnly two lines will be displayed!");
-		
+		Property serverStartingMotd = config.get(CATEGORY_MESSAGES, "ServerStart MOTD", "\u00A74This Server is still Starting\\n\u00A7cPlease Wait...  Estimated: %time%");
+		serverStartingMotd.setComment("Writes an custom MOTD while server is starting\nOnly two lines will be displayed!\nSupports estimated server start time using %time%");
+
 		Property useStartVersion = config.get(CATEGORY_MESSAGES, "UseStartVersion", true);
 		useStartVersion.setComment("Enable override of version?\ntrue: Shows the custom message and enables hover message\nfalse: Shows -1/-1 players online");
-		
+
 		Property startVersion = config.get(CATEGORY_MESSAGES, "StartVersion", "\u00A74Starting...");
-		startVersion.setComment("The Message that will be displayed instead of -1/-1 Players");
-		
+		startVersion.setComment("The Message that will be displayed instead of -1/-1 Players\nSupports estimated server start time using %time%");
+
 		Property startVersionHover = config.get(CATEGORY_MESSAGES, "StartVersion Hover", "\u00a74Server is starting\\n\u00a76Please wait until the server has started completely\\n\u00a7cElse you will \u00a74not\u00a7c be able to join\\n\u00a7eIf you think this is an error contact the server team\\n\\n\u00a7a\u00a7nLinks:\\n\u00a7bSupport website: \u00a71http://example.com\\n\u00a75Discord server: \u00a71http://discord.gg/example");
 		startVersionHover.setComment("Text that will be shows when you hover over the message you set in StartVersion");
-		
+
 		Property serverStartingKick = config.get(CATEGORY_MESSAGES, "serverStartingKick", "\u00a74This server is currently starting\\n\u00a7cPlease wait...");
-		serverStartingKick.setComment("Kick message that will be shown \nto players who want to connect to the starting server\n\nVanilla: Server is still starting. Please wait before reconnecting\nDefault: "+serverStartingKick.getDefault());
-		
+		serverStartingKick.setComment("Kick message that will be shown \nto players who want to connect to the starting server\n\nVanilla: Server is still starting. Please wait before reconnecting\nDefault: " + serverStartingKick.getDefault());
+
 		Property joinMsg = config.get(CATEGORY_MESSAGES, "Join Message", "\u00A76[\u00A72+\u00A76]\u00A77%player%");
 		joinMsg.setComment("Replaces \"PLAYER joined the game\"\n\nVanilla: \u00a7e%player% joined the game");
 		
@@ -128,24 +131,28 @@ public class CustomMessages {
 		
 		Property customMOTDTexts = config.get(CATEGORY_MESSAGES, "Custom MOTDs", new String[] {"\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 players playing on YOURSERVER\\n\u00A73Join them now", "\u00A75Join our discord server:\\n\u00A75discord.gg/example", "Another random MOTD\\nReplace them in config/CustomMessages.cfg"});
 		customMOTDTexts.setComment("Modify the motd as you like\nMultiple Lines in this config will randomize the MOTDs\n\nSupports 2 lines (Use \\n for new line)\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count");
-		
+
 		Property customMOTDPlayerHover = config.get(CATEGORY_MESSAGES, "Custom MOTD PlayerHover", "\u00A76Welcome to YOURSERVER!\\n\u00A73There are \u00A7a%online%\u00A73 players online.\\n\\n\u00A7aOnline:\\n\u00A72%playerlist%\\n\u00A79\u00A7lHave Fun!");
 		customMOTDPlayerHover.setComment("The message you see when hovering over the player count in the server list\n\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count\n%playerlist% - A list of players like vanilla would display\n%gamemode% - The default gamemode of the server");
-		
+
 		Property customMOTDModifyVersion = config.get(CATEGORY_MESSAGES, "Custom MOTD Modify Version", false);
 		customMOTDModifyVersion.setComment("This will show custom text instead of the playercount.\nWARNING: This will also show, that the server is outdated, but players can still join!");
-		
+
 		Property customMOTDVersionText = config.get(CATEGORY_MESSAGES, "Custom MOTD Version", "\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 online!");
 		customMOTDVersionText.setComment("Text used for the custom version\n\nPlaceholders:\n%online% - Online player count\n%max% - Maximum player count");
-		
-		
-		
-		
+
+		Property outdatedServer = config.get(CATEGORY_MESSAGES, "outdatedServer", "Coming from the future? We are still using Minecraft " + MinecraftForge.MC_VERSION);
+		outdatedServer.setComment("Message shown to players joining with newer Minecraft versions\nVanilla: Outdated server! I'm still on " + MinecraftForge.MC_VERSION);
+
+		Property outdatedClient = config.get(CATEGORY_MESSAGES, "outdatedClient", "Your client is too old. Use " + MinecraftForge.MC_VERSION);
+		outdatedClient.setComment("Message shown to players joining with older Minecraft versions\nVanilla: Outdated client! Please use " + MinecraftForge.MC_VERSION);
+
+
 		//LOG MESSAGES
 
 		Property logStartingDisconnect = config.get(CATEGORY_LOG, "Log Starting Disconnect", false);
 		logStartingDisconnect.setComment("Should the server log \"Disconnecting Player: Server is starting\"?");
-		
+
 		Property logConfigReload = config.get(CATEGORY_LOG, "Log Config Reloads", false);
 		logConfigReload.setComment("Should server log an config reload?");
 		
@@ -186,11 +193,12 @@ public class CustomMessages {
 		propOrderMsgs.add(customMOTDPlayerHover.getName());
 		propOrderMsgs.add(customMOTDModifyVersion.getName());
 		propOrderMsgs.add(customMOTDVersionText.getName());
+		propOrderMsgs.add(outdatedServer.getName());
+		propOrderMsgs.add(outdatedClient.getName());
+
 		config.setCategoryPropertyOrder(CATEGORY_MESSAGES, propOrderMsgs);
-		
-		
-		
-		
+
+
 		//LOG
 		List<String> orderLogs = new ArrayList<String>();
 		orderLogs.add(logStartingDisconnect.getName());
@@ -217,10 +225,14 @@ public class CustomMessages {
 			CUSTOM_MOTD_PLAYER_HOVER = customMOTDPlayerHover.getString().replace("\\n", "\n");
 			CUSTOM_MOTD_USE_VERSION = customMOTDModifyVersion.getBoolean();
 			CUSTOM_MOTD_VERSION = customMOTDVersionText.getString();
+			OUTDATED_CLIENT = outdatedClient.getString();
+			OUTDATED_SERVER = outdatedServer.getString();
+
+
 			//LOG
 			LOG_START_DISCONNECT = logStartingDisconnect.getBoolean();
 			LOG_CONFIG_RELOAD = logConfigReload.getBoolean();
-			
+
 			//DEV
 			DEV_AUTO_RELOAD_CONFIG_SEC = reloadConfigAfter.getInt();
 			DEV_DELAY_SERVER = delayServerStart.getBoolean();

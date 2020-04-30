@@ -1,0 +1,10 @@
+{
+  "package": "de.erdbeerbaerlp.customServerMessages.mixin",
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_8",
+  "required": true,
+  "target": "@env(INIT)",
+  "server": [
+    "MixinLoader"
+  ]
+}

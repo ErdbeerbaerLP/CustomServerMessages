@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "de.erdbeerbaerlp.customServerMessages.mixin",
+  "refmap": "mixins.customservermsgs.refmap.json",
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinDedServer",
+    "MixinHandshakeTCP",
+    "MixinMCServer",
+    "MixinNetworkManager"
+  ]
+}

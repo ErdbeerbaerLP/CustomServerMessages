@@ -1,130 +1,90 @@
 package de.erdbeerbaerlp.customServerMessages;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.logging.log4j.Logger;
-
 import net.minecraft.network.NetworkSystem;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.dedicated.PropertyManager;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
-@Mod(modid=CustomServerMessagesMod.MODID, version = CustomServerMessagesMod.VERSION, name = CustomServerMessagesMod.NAME, serverSideOnly = true, acceptableRemoteVersions = "*")
+import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+@Mod(modid = CustomServerMessagesMod.MODID, version = CustomServerMessagesMod.VERSION, name = CustomServerMessagesMod.NAME, serverSideOnly = true, acceptableRemoteVersions = "*")
 @EventBusSubscriber
 public class CustomServerMessagesMod {
 	public static final String MODID = "servermsgs";
 	public static final String NAME = "Custom Server Messages";
-	public static final String VERSION = "2.0.0";
-	static boolean serverStarted = false;
-	private static boolean preServer = true;
-	private static final Logger LOGGER = FMLLog.log;
-	static PropertyManager settings;
-	private final NetworkSystem s = new CustomNetworkSystem();
+	public static final String VERSION = "3.0.0";
+	public static final File estimatedTimeFile = new File("./serverStartTime.txt");
+	public static boolean serverStarted = false;
+	public static boolean preServer = true;
+	public static PreServerThread preServerThread;
+	// Times for tracking server start time, set to 0 to prevent NPEs
+	public static Instant serverLaunched = Instant.ofEpochMilli(0);
+	public static Instant serverLaunchCompleted = Instant.ofEpochMilli(0);
 
-	{
-		CustomMessages.preInit();
-		final MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-
-		LOGGER.info("Loading properties");
-		CustomServerMessagesMod.settings = new PropertyManager(new File("server.properties"));
-
-		ObfuscationReflectionHelper.setPrivateValue(MinecraftServer.class, server, s, "networkSystem", "field_147144_o");
-		InetAddress inetaddress = null;
-		final String ip = CustomServerMessagesMod.settings.getStringProperty("server-ip", "");
-		final int port = CustomServerMessagesMod.settings.getIntProperty("server-port", 25565);
-		if (!ip.isEmpty())
-		{
-			try {
-				inetaddress = InetAddress.getByName(ip);
-			} catch (UnknownHostException e) {}
-		}
-		LOGGER.info("Starting Pre-Minecraft server on {}:{}", ip.isEmpty() ? "*" : ip, Integer.valueOf(port));
-
-		try
-		{
-			s.addLanEndpoint(inetaddress, port);
-		}
-		catch (IOException ioexception)
-		{
-			LOGGER.warn("**** FAILED TO BIND TO PORT!");
-			LOGGER.warn("The exception was: {}", (Object)ioexception.toString());
-			LOGGER.warn("Perhaps a server is already running on that port?");
-			preServer = false;
-			FMLCommonHandler.instance().exitJava(-1, true);
-		}
-		new Thread() {
-			{
-				setName("Early Network Handler");
-				setDaemon(true);
+	public static String getEstimatedStartTime() {
+		try {
+			if (!CustomServerMessagesMod.estimatedTimeFile.exists()) {
+				CustomServerMessagesMod.estimatedTimeFile.createNewFile();
+				final BufferedWriter w = new BufferedWriter(new FileWriter(CustomServerMessagesMod.estimatedTimeFile));
+				w.write("0");
+				w.close();
 			}
-			public void run() {
-				while(preServer) {
-					s.networkTick();
-				}
-			};
-		}.start();
-	}
-	@Mod.EventHandler
-	public void preInit(FMLPreInitializationEvent ev) {
-		Thread r = new Thread() {
-			@SuppressWarnings("static-access")
-			public void run() {
-				if(CustomMessages.DEV_AUTO_RELOAD_CONFIG_SEC != 0)
-					while(true){
-						if(CustomMessages.DEV_AUTO_RELOAD_CONFIG_SEC != 0){
-							try {
-								Thread.sleep(TimeUnit.SECONDS.toMillis(CustomMessages.DEV_AUTO_RELOAD_CONFIG_SEC));
-								CustomMessages.preInit();
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								System.err.println("Error auto-reloading config: InterruptedException");
-							}
-						}
-					}
-			}
-		};
-		r.setDaemon(true);
-		r.setPriority(Thread.MAX_PRIORITY);
-		r.start();
-		preServer = false;
-		s.terminateEndpoints();
-	}
-	@Mod.EventHandler
-	public void init(FMLInitializationEvent ev) {
-
-		if(CustomMessages.DEV_DELAY_SERVER){
-			try {
-				TimeUnit.SECONDS.sleep(9999);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				System.err.println("Got interrupted while delaying server");
-			}
+			final BufferedReader r = new BufferedReader(new FileReader(estimatedTimeFile));
+			final long millis = Long.parseLong(r.readLine());
+			r.close();
+			final Instant now = Instant.now();
+			final Instant instant = serverLaunched.plusMillis(millis);
+			final Duration d = Duration.between(now, instant);
+			if (d.isNegative()) return "00:00";
+			int seconds = (int) d.getSeconds();
+			int minutes = seconds / 60;
+			seconds = seconds - (minutes * 60);
+			return minutes + ":" + seconds;
+		} catch (IOException | NumberFormatException e) {
+			e.printStackTrace();
 		}
+		return "??:??";
 	}
-	@Mod.EventHandler
-	public void postInit(FMLPostInitializationEvent ev) {
 
-	}
 	@Mod.EventHandler
-	public void onServerStarting(FMLServerStartingEvent event){
+	public void onServerStarting(FMLServerStartingEvent event) {
 		event.registerServerCommand(new ReloadCommand());
-		if(CustomMessages.HELP_LIST.length != 0) event.registerServerCommand(new HelpCommand());
+		if (CustomMessages.HELP_LIST.length != 0) event.registerServerCommand(new HelpCommand());
 	}
+
 	@Mod.EventHandler
 	public void serverStarted(FMLServerStartedEvent ev) {
 		serverStarted = true;
+		serverLaunchCompleted = Instant.now();
+		try {
+			if (!CustomServerMessagesMod.estimatedTimeFile.exists())
+				CustomServerMessagesMod.estimatedTimeFile.createNewFile();
+			final BufferedWriter w = new BufferedWriter(new FileWriter(CustomServerMessagesMod.estimatedTimeFile));
+			w.write((ChronoUnit.MILLIS.between(serverLaunched, serverLaunchCompleted)) + "");
+			w.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static class PreServerThread extends Thread {
+		private NetworkSystem sys;
+
+		public PreServerThread(NetworkSystem sys) {
+			this.sys = sys;
+			setName("Early Network Handler");
+			setDaemon(true);
+			setPriority(MAX_PRIORITY);
+		}
+
+		public void run() {
+			while (preServer) {
+				sys.networkTick();
+			}
+		}
 	}
 }

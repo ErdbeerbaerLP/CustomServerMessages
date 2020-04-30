@@ -1,10 +1,5 @@
 package de.erdbeerbaerlp.customServerMessages;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -15,15 +10,19 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.util.text.event.HoverEvent.Action;
 
-public class HelpCommand extends CommandBase
-{
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
+public class HelpCommand extends CommandBase {
     private final Random rand = new Random();
 
     /**
      * Gets the name of the command
      */
-    public String getName()
-    {
+    public String getName() {
         return "help";
     }
 
