@@ -7,6 +7,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketChat;
+import net.minecraft.network.play.server.SPacketDisconnect;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -63,6 +64,12 @@ public abstract class MixinNetworkManager {
                 System.out.println(tct.getKey());
                 if (tct.getKey().startsWith("multiplayer.disconnect.server_shutdown")) {
                     return new net.minecraft.network.play.server.SPacketDisconnect(new TextComponentString(CustomMessages.STOP_MSG));
+                }
+                if (tct.getKey().startsWith("disconnect.spam")) {
+                    return new SPacketDisconnect(new TextComponentString(CustomMessages.KICK_SPAM));
+                }
+                if (tct.getKey().startsWith("multiplayer.disconnect.idling")) {
+                    return new SPacketDisconnect(new TextComponentString(CustomMessages.KICK_AFK));
                 }
             }
         }

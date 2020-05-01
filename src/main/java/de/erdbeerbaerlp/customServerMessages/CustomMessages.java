@@ -39,6 +39,8 @@ public class CustomMessages {
 	public static String CUSTOM_MOTD_VERSION;
 	public static String OUTDATED_SERVER;
 	public static String OUTDATED_CLIENT;
+	public static String KICK_SPAM;
+	public static String KICK_AFK;
 
 	//LOG
 	public static boolean LOG_START_DISCONNECT;
@@ -57,7 +59,6 @@ public class CustomMessages {
 		File configFile = new File("./config/CustomMessages.cfg");
 		config = new Configuration(configFile);
 		syncFromFiles();
-		System.out.println("Delay == " + DEV_DELAY_SERVER);
 	}
 	
 	public static Configuration getConfig(){
@@ -147,6 +148,11 @@ public class CustomMessages {
 		Property outdatedClient = config.get(CATEGORY_MESSAGES, "outdatedClient", "Your client is too old. Use " + MinecraftForge.MC_VERSION);
 		outdatedClient.setComment("Message shown to players joining with older Minecraft versions\nVanilla: Outdated client! Please use " + MinecraftForge.MC_VERSION);
 
+		Property kickSpam = config.get(CATEGORY_MESSAGES, "kickSpam", "Please do not spam!");
+		kickSpam.setComment("Kick message shown to spamming players\nDoes not modify other mods's messages, only the vanilla one");
+		Property kickAfk = config.get(CATEGORY_MESSAGES, "kickAFK", "\u00a7cYou have been AFK for too long!");
+		kickSpam.setComment("Idle-Timeout kick message\nVanilla: You have been idle for too long!");
+
 
 		//LOG MESSAGES
 
@@ -195,6 +201,9 @@ public class CustomMessages {
 		propOrderMsgs.add(customMOTDVersionText.getName());
 		propOrderMsgs.add(outdatedServer.getName());
 		propOrderMsgs.add(outdatedClient.getName());
+		propOrderMsgs.add(kickSpam.getName());
+		propOrderMsgs.add(kickAfk.getName());
+
 
 		config.setCategoryPropertyOrder(CATEGORY_MESSAGES, propOrderMsgs);
 
@@ -227,7 +236,8 @@ public class CustomMessages {
 			CUSTOM_MOTD_VERSION = customMOTDVersionText.getString();
 			OUTDATED_CLIENT = outdatedClient.getString();
 			OUTDATED_SERVER = outdatedServer.getString();
-
+			KICK_SPAM = kickSpam.getString();
+			KICK_AFK = kickAfk.getString();
 
 			//LOG
 			LOG_START_DISCONNECT = logStartingDisconnect.getBoolean();
