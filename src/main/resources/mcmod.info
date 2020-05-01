@@ -1,13 +1,15 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
+  "modid": "customservermsgs",
+  "name": "Custom Server Messages",
   "description": "Example placeholder mod.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
+  "authorList": [
+    "ExampleDude"
+  ],
   "credits": "The Forge and FML guys, for making this example",
   "logoFile": "",
   "screenshots": [],

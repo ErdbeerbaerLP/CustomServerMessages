@@ -1,6 +1,7 @@
 package de.erdbeerbaerlp.customServerMessages.mixin;
 
 import de.erdbeerbaerlp.customServerMessages.CustomMessages;
+import de.erdbeerbaerlp.customServerMessages.CustomServerMessagesMod;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.network.NetworkManager;
@@ -27,7 +28,8 @@ public abstract class MixinNetworkManager {
             if (com instanceof TextComponentTranslation) {
                 final TextComponentTranslation tct = (TextComponentTranslation) com;
                 final String player = tct.getUnformattedText().split(" ")[0];
-                boolean timeout = false;
+                boolean timeout = CustomServerMessagesMod.playersTimedOut.contains(player);
+                if (timeout) CustomServerMessagesMod.playersTimedOut.remove(player);
                 if (tct.getKey().startsWith("multiplayer.player.left")) {
                     final TextComponentString leaveMsg = new TextComponentString((timeout ? CustomMessages.LEAVE_MSG_TIMEOUT : CustomMessages.LEAVE_MSG).replace("%player%", player));
                     leaveMsg.setStyle(tct.getStyle());

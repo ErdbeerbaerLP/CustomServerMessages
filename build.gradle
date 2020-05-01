@@ -43,7 +43,7 @@ configurations {
     compile.extendsFrom(embed)
 }
 minecraft {
-    version = "1.12.2-14.23.4.2705"
+    version = "1.12.2-14.23.5.2847"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -92,6 +92,7 @@ jar {
     classifier '1.12'
     manifest {
         attributes([
+                'FMLAT': 'customservermsgs_at.cfg',
                 'Maven-Artifact': "${project.group}:${project.archivesBaseName}:${project.version}",
                 'Timestamp': System.currentTimeMillis(),
                 'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',

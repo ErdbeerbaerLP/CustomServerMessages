@@ -98,7 +98,6 @@ public class MixinLoader {
                 e.printStackTrace();
             }
         }
-        server.setMOTD(settings.getStringProperty("motd", "A Minecraft Server"));
 
         if (server.getServerPort() < 0) {
             server.setServerPort(settings.getIntProperty("server-port", 25565));
@@ -106,13 +105,13 @@ public class MixinLoader {
 
         LOGGER.info("Generating keypair");
         server.setKeyPair(CryptManager.generateKeyPair());
-        LOGGER.info("Starting CSM-Minecraft server on {}:{}", server.getServerHostname().isEmpty() ? "*" : server.getServerHostname(), Integer.valueOf(server.getServerPort()));
+        LOGGER.info("Starting Minecraft server on {}:{}", server.getServerHostname().isEmpty() ? "*" : server.getServerHostname(), Integer.valueOf(server.getServerPort()));
 
         try {
             server.getNetworkSystem().addLanEndpoint(inetaddress, server.getServerPort());
         } catch (IOException ioexception) {
             LOGGER.warn("**** FAILED TO BIND TO PORT!");
-            LOGGER.warn("The exception was: {}", (Object) ioexception.toString());
+            LOGGER.warn("The exception was: {}", ioexception.toString());
             LOGGER.warn("Perhaps a server is already running on that port?");
             FMLCommonHandler.instance().exitJava(1, true);
         }
@@ -123,7 +122,8 @@ public class MixinLoader {
             LOGGER.warn("While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.");
             LOGGER.warn("To change this, set \"online-mode\" to \"true\" in the server.properties file.");
         }
-        CustomServerMessagesMod.preServerThread = new CustomServerMessagesMod.PreServerThread(new NetworkSystem(server));
+        CustomServerMessagesMod.vanillaSystem = server.networkSystem;
+        CustomServerMessagesMod.preServerThread = new CustomServerMessagesMod.PreServerThread(server.networkSystem = new NetworkSystem(server));
         CustomServerMessagesMod.preServerThread.start();
 
         Thread r = new Thread(() -> {
@@ -148,11 +148,6 @@ public class MixinLoader {
             } catch (InterruptedException e) {
                 System.err.println("Got interrupted while delaying server");
             }
-        }
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            System.err.println("Got interrupted while delaying server");
         }
         progressBar.step(message);
     }

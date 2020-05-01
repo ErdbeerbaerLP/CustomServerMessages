@@ -4,10 +4,14 @@
   "refmap": "mixins.customservermsgs.refmap.json",
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
+  "server": [
     "MixinDedServer",
     "MixinHandshakeTCP",
     "MixinMCServer",
     "MixinNetworkManager"
+  ],
+  "mixins": [
+    "MixinNetHandlerPlayServer",
+    "MixinServerHandler"
   ]
 }

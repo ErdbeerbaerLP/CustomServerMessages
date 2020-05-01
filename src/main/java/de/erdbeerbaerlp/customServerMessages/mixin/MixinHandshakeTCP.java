@@ -8,6 +8,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.server.SPacketDisconnect;
+import net.minecraft.network.status.server.SPacketServerInfo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.network.NetHandlerHandshakeTCP;
@@ -29,7 +30,6 @@ import java.util.UUID;
 
 @Mixin(NetHandlerHandshakeTCP.class)
 public class MixinHandshakeTCP {
-    private static int version;
     @Final
     @Shadow
     private MinecraftServer server;
@@ -38,13 +38,12 @@ public class MixinHandshakeTCP {
     private NetworkManager networkManager;
 
 
-    @Redirect(method = "processHandshake", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/common/FMLCommonHandler;handleServerHandshake(Lnet/minecraft/network/handshake/client/C00Handshake;Lnet/minecraft/network/NetworkManager;)Z", ordinal = 0))
+    @Redirect(method = "processHandshake", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/common/FMLCommonHandler;handleServerHandshake(Lnet/minecraft/network/handshake/client/C00Handshake;Lnet/minecraft/network/NetworkManager;)Z", ordinal = 0, remap = false))
     private boolean packet(FMLCommonHandler fmlCommonHandler, C00Handshake packet, NetworkManager manager) {
-        System.out.println("Handshake incoming!");
         DedicatedServer.allowPlayerLogins = true;
         final boolean fml = fmlCommonHandler.handleServerHandshake(packet, manager);
         if (!fml) return false;
-        System.out.println("Forge boolean: " + fml);
+        int version = 0;
         //noinspection ConstantConditions
         if (MinecraftForge.MC_VERSION.equals("1.12.2"))
             version = 340;
@@ -52,11 +51,8 @@ public class MixinHandshakeTCP {
             version = 338;
         else if (MinecraftForge.MC_VERSION.equals("1.12"))
             version = 335;
-        else
-            version = 0;
-        System.out.println("Server version number: " + version);
         if (CustomServerMessagesMod.serverStarted) {
-            System.out.println("Server Started");
+            if (packet.getRequestedState() != EnumConnectionState.STATUS) return true;
             if (packet.getRequestedState() == EnumConnectionState.STATUS && CustomMessages.CUSTOM_MOTD_ENABLED) {
                 final ServerStatusResponse statusResp = server.getServerStatusResponse();
                 final ServerStatusResponse.Players statusPlayers = new ServerStatusResponse.Players(server.getMaxPlayers(), server.getCurrentPlayerCount());
@@ -74,14 +70,16 @@ public class MixinHandshakeTCP {
                                 .replace("%max%", server.getMaxPlayers() + "")
                         : MinecraftForge.MC_VERSION, CustomMessages.CUSTOM_MOTD_USE_VERSION ? Integer.MAX_VALUE : version));
                 statusResp.setPlayers(statusPlayers);
-                statusResp.setServerDescription(new TextComponentString(CustomMessages.getRandomMOTD().replace("%online%", server.getCurrentPlayerCount() + "").replace("%max%", "" + server.getMaxPlayers())));
+                statusResp.setServerDescription(new TextComponentString(CustomMessages.getRandomMOTD()
+                        .replace("%online%", server.getCurrentPlayerCount() + "")
+                        .replace("%max%", "" + server.getMaxPlayers())
+                        .replace("%time%", CustomServerMessagesMod.getOverworldTime(false))
+                        .replace("%time-colored%", CustomServerMessagesMod.getOverworldTime(true))));
                 server.applyServerIconToResponse(statusResp);
+                return true;
             }
             return true;
         } else {
-            System.out.println("Server not started!");
-            System.out.println("Packet requested state: " + packet.getRequestedState());
-
             final TextComponentString startKick = new TextComponentString(CustomMessages.START_KICK_MSG);
             if (packet.getRequestedState().equals(EnumConnectionState.LOGIN)) {
                 if (CustomMessages.LOG_START_DISCONNECT)
@@ -99,7 +97,8 @@ public class MixinHandshakeTCP {
                 statusResp.setPlayers(statusPlayers);
                 statusResp.setServerDescription(new TextComponentString(CustomMessages.START_MOTD.replace("%time%", CustomServerMessagesMod.getEstimatedStartTime())));
                 //server.applyServerIconToResponse(statusResp);
-                return true;
+                networkManager.sendPacket(new SPacketServerInfo(statusResp));
+                return false;
             }
         }
         return true;

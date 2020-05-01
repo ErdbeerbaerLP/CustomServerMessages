@@ -113,24 +113,24 @@ public class CustomMessages {
 
 		Property joinMsg = config.get(CATEGORY_MESSAGES, "Join Message", "\u00A76[\u00A72+\u00A76]\u00A77%player%");
 		joinMsg.setComment("Replaces \"PLAYER joined the game\"\n\nVanilla: \u00a7e%player% joined the game");
-		
+
 		Property leaveMsg = config.get(CATEGORY_MESSAGES, "Leave Message", "\u00A76[\u00A7c-\u00A76]\u00A77%player%");
 		leaveMsg.setComment("Replaces \"PLAYER left the game\"\n\nVanilla: \u00a7e%player% left the game");
-		
+
 		Property leaveTimeoutMsg = config.get(CATEGORY_MESSAGES, "Timeout Message", "\u00A76[\u00A7c-\u00A76]\u00A77%player% timed out");
 		leaveTimeoutMsg.setComment("Replaces \"PLAYER left the game\" when player timed out\n\nVanilla: \u00a7e%player% left the game");
-		
-		Property stopMsg = config.get(CATEGORY_MESSAGES,"Stop Message", "\u00A7cServer has been stopped or is restarting\\n\u00A77Try joining again later");
-		stopMsg.setComment("The message you get when the server stops\n\nVanilla: Server closed\nDefault: "+stopMsg.getDefault());
-		
-		Property helpMsg = config.get(CATEGORY_MESSAGES, "Help Messages", new String[] {});
+
+		Property stopMsg = config.get(CATEGORY_MESSAGES, "Stop Message", "\u00A7cServer has been stopped or is restarting\\n\u00A77Try joining again later");
+		stopMsg.setComment("The message you get when the server stops\n\nVanilla: Server closed\nDefault: " + stopMsg.getDefault());
+
+		Property helpMsg = config.get(CATEGORY_MESSAGES, "Help Messages", new String[]{});
 		helpMsg.setComment("A list of custom help messages to show instead of the vanilla /help command\nWhen there are multiple they get randomized\n\nLeave empty to disable\nDoes NOT enable/disable with /messagereload");
-		
+
 		Property useCustomMOTD = config.get(CATEGORY_MESSAGES, "Use Custom MOTD", true);
 		useCustomMOTD.setComment("Enable custom MOTD handling");
-		
-		Property customMOTDTexts = config.get(CATEGORY_MESSAGES, "Custom MOTDs", new String[] {"\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 players playing on YOURSERVER\\n\u00A73Join them now", "\u00A75Join our discord server:\\n\u00A75discord.gg/example", "Another random MOTD\\nReplace them in config/CustomMessages.cfg"});
-		customMOTDTexts.setComment("Modify the motd as you like\nMultiple Lines in this config will randomize the MOTDs\n\nSupports 2 lines (Use \\n for new line)\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count");
+
+		Property customMOTDTexts = config.get(CATEGORY_MESSAGES, "Custom MOTDs", new String[]{"\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 players playing on YOURSERVER\\n\u00A73Join them now", "\u00A75Join our discord server:\\n\u00A75discord.gg/example", "Another random MOTD\\nReplace them in config/CustomMessages.cfg"});
+		customMOTDTexts.setComment("Modify the motd as you like\nMultiple Lines in this config will randomize the MOTDs\n\nSupports 2 lines (Use \\n for new line)\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count\n%time% - Time in the Overworld\n%time-colored% - Time in the Overworld, Green while day, Red while night");
 
 		Property customMOTDPlayerHover = config.get(CATEGORY_MESSAGES, "Custom MOTD PlayerHover", "\u00A76Welcome to YOURSERVER!\\n\u00A73There are \u00A7a%online%\u00A73 players online.\\n\\n\u00A7aOnline:\\n\u00A72%playerlist%\\n\u00A79\u00A7lHave Fun!");
 		customMOTDPlayerHover.setComment("The message you see when hovering over the player count in the server list\n\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count\n%playerlist% - A list of players like vanilla would display\n%gamemode% - The default gamemode of the server");
