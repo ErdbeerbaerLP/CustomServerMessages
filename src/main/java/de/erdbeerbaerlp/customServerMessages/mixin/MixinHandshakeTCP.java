@@ -62,6 +62,8 @@ public class MixinHandshakeTCP {
                                 .replace("%max%", server.getMaxPlayers() + "")
                                 .replace("%gamemode%", server.getGameType().getName())
                                 .replace("%playerlist%", getPlayerList())
+                                .replace("%time%", CustomServerMessagesMod.getOverworldTime(false))
+                                .replace("%time-colored%", CustomServerMessagesMod.getOverworldTime(true))
                 )};
                 statusPlayers.setPlayers(playersIn);
                 statusResp.setVersion(new ServerStatusResponse.Version(CustomMessages.CUSTOM_MOTD_USE_VERSION ?

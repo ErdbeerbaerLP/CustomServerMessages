@@ -133,8 +133,8 @@ public class CustomMessages {
 		Property customMOTDTexts = config.get(CATEGORY_MESSAGES, "Custom MOTDs", new String[]{"\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 players playing on YOURSERVER\\n\u00A73Join them now", "\u00A75Join our discord server:\\n\u00A75discord.gg/example", "Another random MOTD\\nReplace them in config/CustomMessages.cfg"});
 		customMOTDTexts.setComment("Modify the motd as you like\nMultiple Lines in this config will randomize the MOTDs\n\nSupports 2 lines (Use \\n for new line)\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count\n%time% - Time in the Overworld\n%time-colored% - Time in the Overworld, Green while day, Red while night");
 
-		Property customMOTDPlayerHover = config.get(CATEGORY_MESSAGES, "Custom MOTD PlayerHover", "\u00A76Welcome to YOURSERVER!\\n\u00A73There are \u00A7a%online%\u00A73 players online.\\n\\n\u00A7aOnline:\\n\u00A72%playerlist%\\n\u00A79\u00A7lHave Fun!");
-		customMOTDPlayerHover.setComment("The message you see when hovering over the player count in the server list\n\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count\n%playerlist% - A list of players like vanilla would display\n%gamemode% - The default gamemode of the server");
+		Property customMOTDPlayerHover = config.get(CATEGORY_MESSAGES, "Custom MOTD PlayerHover", "\u00A76Welcome to YOURSERVER!\\n\u00A73There are \u00A7a%online%\u00A73 players online.\\nWorld time: %time-colored%\\n\\n\u00A7aOnline:\\n\u00A72%playerlist%\\n\u00A79\u00A7lHave Fun!");
+		customMOTDPlayerHover.setComment("The message you see when hovering over the player count in the server list\n\nPlaceholders:\n%online% - Online Players\n%max% - Maximum player count\n%playerlist% - A list of players like vanilla would display\n%gamemode% - The default gamemode of the server\n%time% - Time in the Overworld\n%time-colored% - Time in the Overworld, Green while day, Red while night");
 
 		Property customMOTDModifyVersion = config.get(CATEGORY_MESSAGES, "Custom MOTD Modify Version", false);
 		customMOTDModifyVersion.setComment("This will show custom text instead of the playercount.\nWARNING: This will also show, that the server is outdated, but players can still join!");
@@ -151,7 +151,7 @@ public class CustomMessages {
 		Property kickSpam = config.get(CATEGORY_MESSAGES, "kickSpam", "Please do not spam!");
 		kickSpam.setComment("Kick message shown to spamming players\nDoes not modify other mods's messages, only the vanilla one");
 		Property kickAfk = config.get(CATEGORY_MESSAGES, "kickAFK", "\u00a7cYou have been AFK for too long!");
-		kickSpam.setComment("Idle-Timeout kick message\nVanilla: You have been idle for too long!");
+		kickAfk.setComment("Idle-Timeout kick message\nVanilla: You have been idle for too long!");
 
 
 		//LOG MESSAGES

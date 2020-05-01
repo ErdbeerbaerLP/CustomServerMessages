@@ -102,3 +102,23 @@ jar {
         ])
     }
 }
+curseforge {
+    // $GRADLE_USER_HOME/gradle.properties
+    if (project.hasProperty('curseforge.apikey')) {
+        apiKey = getProperty("curseforge.apikey")
+        project {
+            id = '301614'
+            changelog = project.changelog
+            releaseType = 'release'
+            addGameVersion '1.12.2'
+            addGameVersion '1.12.1'
+            addGameVersion '1.12'
+            mainArtifact(jar) {
+                displayName = "CustomServerMessages-$version (MC 1.12)"
+            }
+            relations {
+            }
+        }
+    }
+}
+tasks.curseforge.dependsOn(build)
