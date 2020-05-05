@@ -22,7 +22,7 @@ apply plugin: 'org.spongepowered.mixin'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "3.0.0"
+version = "3.0.1"
 group = "de.erdbeerbaerlp.customServerMessages" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "customServerMessages"
 
@@ -109,14 +109,12 @@ curseforge {
         project {
             id = '301614'
             changelog = project.changelog
-            releaseType = 'release'
+            releaseType = 'beta'
             addGameVersion '1.12.2'
             addGameVersion '1.12.1'
             addGameVersion '1.12'
             mainArtifact(jar) {
                 displayName = "CustomServerMessages-$version (MC 1.12)"
-            }
-            relations {
             }
         }
     }

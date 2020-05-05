@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class CustomServerMessagesMod {
 	public static final String MODID = "servermsgs";
 	public static final String NAME = "Custom Server Messages";
-	public static final String VERSION = "3.0.0";
+	public static final String VERSION = "3.0.1";
 	/**
 	 * File for storing the last time the server needed to start up
 	 */
@@ -59,9 +59,11 @@ public class CustomServerMessagesMod {
 				w.write("0");
 				w.close();
 			}
-			final BufferedReader r = new BufferedReader(new FileReader(estimatedTimeFile));
-			final long millis = Long.parseLong(r.readLine());
-			r.close();
+			final ArrayList<String> s = readFile();
+			final ArrayList<Long> l = new ArrayList<>();
+			for (String st : s)
+				l.add(Long.parseLong(st));
+			final long millis = average(l.toArray(new Long[0]));
 			final Instant now = Instant.now();
 			final Instant instant = serverLaunched.plusMillis(millis);
 			final Duration d = Duration.between(now, instant);
@@ -85,6 +87,15 @@ public class CustomServerMessagesMod {
 		if (CustomMessages.HELP_LIST.length != 0) event.registerServerCommand(new HelpCommand());
 	}
 
+	public static long average(Long... longs) {
+		final long len = longs.length + 1;
+		long sum = 0;
+		for (long l : longs) {
+			sum = sum + l;
+		}
+		return sum / len;
+	}
+
 	public static String getOverworldTime(boolean colored) {
 		final long overworldTicks = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0).getWorldTime();
 		final long ticksThisDay = overworldTicks % 24000;
@@ -99,6 +110,16 @@ public class CustomServerMessagesMod {
 		return out;
 	}
 
+	private static ArrayList<String> readFile() throws IOException {
+		final BufferedReader r = new BufferedReader(new FileReader(estimatedTimeFile));
+		final ArrayList<String> s = new ArrayList<>();
+		r.lines().forEach(e -> {
+			if (!e.isEmpty()) s.add(e);
+		});
+		r.close();
+		return s;
+	}
+
 	@Mod.EventHandler
 	public void serverStarted(FMLServerStartedEvent ev) {
 		serverStarted = true;
@@ -108,8 +129,13 @@ public class CustomServerMessagesMod {
 			try {
 				if (!CustomServerMessagesMod.estimatedTimeFile.exists())
 					CustomServerMessagesMod.estimatedTimeFile.createNewFile();
+				final ArrayList<String> s = readFile();
+				if (s.size() > 4) s.clear();
+				if (s.size() == 4) s.remove(0);
+				s.add(ChronoUnit.MILLIS.between(serverLaunched, serverLaunchCompleted) + "");
 				final BufferedWriter w = new BufferedWriter(new FileWriter(CustomServerMessagesMod.estimatedTimeFile));
-				w.write((ChronoUnit.MILLIS.between(serverLaunched, serverLaunchCompleted)) + "");
+				for (String l : s)
+					w.write(l + "\n");
 				w.close();
 			} catch (IOException e) {
 			e.printStackTrace();
