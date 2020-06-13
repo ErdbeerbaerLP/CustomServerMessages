@@ -6,12 +6,10 @@
   "compatibilityLevel": "JAVA_8",
   "server": [
     "MixinDedServer",
-    "MixinHandshakeTCP",
     "MixinMCServer",
-    "MixinNetworkManager"
-  ],
-  "mixins": [
-    "MixinNetHandlerPlayServer",
-    "MixinServerHandler"
+    "MixinNetworkManager",
+    "MixinServerHandshakeNetHandler",
+    "MixinServerPlayNetHandler",
+    "MixinStartupQuery"
   ]
 }

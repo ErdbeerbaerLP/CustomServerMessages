@@ -1,16 +1,17 @@
 package de.erdbeerbaerlp.customServerMessages.mixin;
 
-import de.erdbeerbaerlp.customServerMessages.CustomMessages;
+import de.erdbeerbaerlp.customServerMessages.CustomMessagesConfig;
 import de.erdbeerbaerlp.customServerMessages.CustomServerMessagesMod;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.SPacketChat;
-import net.minecraft.network.play.server.SPacketDisconnect;
+import net.minecraft.network.play.server.SChatPacket;
+import net.minecraft.network.play.server.SDisconnectPacket;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,54 +23,52 @@ import javax.annotation.Nullable;
 @Mixin(NetworkManager.class)
 public abstract class MixinNetworkManager {
 
-    private static Packet<?> modifyPacket(Packet<?> packetIn) {
-        if (packetIn instanceof SPacketChat) {
-            final SPacketChat msg = (SPacketChat) packetIn;
-            final ITextComponent com = ObfuscationReflectionHelper.getPrivateValue(SPacketChat.class, msg, "chatComponent", "field_148919_a", "a");
-            if (com instanceof TextComponentTranslation) {
-                final TextComponentTranslation tct = (TextComponentTranslation) com;
-                final String player = tct.getUnformattedText().split(" ")[0];
+    private static IPacket<?> modifyPacket(IPacket<?> packetIn) {
+        if (packetIn instanceof SChatPacket) {
+            final SChatPacket msg = (SChatPacket) packetIn;
+            final ITextComponent com = ObfuscationReflectionHelper.getPrivateValue(SChatPacket.class, msg, "field_148919_a");
+            if (com instanceof TranslationTextComponent) {
+                final TranslationTextComponent tct = (TranslationTextComponent) com.setStyle(new Style());
+                final String player = tct.getFormattedText().split(" ")[0];
                 boolean timeout = CustomServerMessagesMod.playersTimedOut.contains(player);
                 if (timeout) CustomServerMessagesMod.playersTimedOut.remove(player);
                 if (tct.getKey().startsWith("multiplayer.player.left")) {
-                    final TextComponentString leaveMsg = new TextComponentString((timeout ? CustomMessages.LEAVE_MSG_TIMEOUT : CustomMessages.LEAVE_MSG).replace("%player%", player));
+                    final StringTextComponent leaveMsg = new StringTextComponent((timeout ? CustomMessagesConfig.instance().messages.timeoutLeaveMessage : CustomMessagesConfig.instance().messages.leaveMessage).replace("%player%", player));
                     leaveMsg.setStyle(tct.getStyle());
-                    return new SPacketChat(leaveMsg, msg.getType());
+                    return new SChatPacket(leaveMsg, msg.getType());
                 }
                 if (tct.getKey().startsWith("multiplayer.player.joined")) {
-                    final TextComponentString joinMsg = new TextComponentString(CustomMessages.JOIN_MSG.replace("%player%", player));
+                    final StringTextComponent joinMsg = new StringTextComponent(CustomMessagesConfig.instance().messages.joinMessage.replace("%player%", player));
                     joinMsg.setStyle(tct.getStyle());
-                    return new SPacketChat(joinMsg, msg.getType());
+                    return new SChatPacket(joinMsg, msg.getType());
                 }
             }
         }
-        if (packetIn instanceof net.minecraft.network.login.server.SPacketDisconnect) {
-            final net.minecraft.network.login.server.SPacketDisconnect p = (net.minecraft.network.login.server.SPacketDisconnect) packetIn;
-            if (ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.login.server.SPacketDisconnect.class, p, "reason", "a", "field_149605_a") instanceof TextComponentTranslation) {
-                final TextComponentTranslation tct = ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.login.server.SPacketDisconnect.class, p, "reason", "a", "field_149605_a");
-                System.out.println(tct.getKey());
+        if (packetIn instanceof net.minecraft.network.login.server.SDisconnectLoginPacket) {
+            final net.minecraft.network.login.server.SDisconnectLoginPacket p = (net.minecraft.network.login.server.SDisconnectLoginPacket) packetIn;
+            if (ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.login.server.SDisconnectLoginPacket.class, p, "field_149605_a") instanceof TranslationTextComponent) {
+                final TranslationTextComponent tct = ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.login.server.SDisconnectLoginPacket.class, p, "field_149605_a");
                 if (tct.getKey().startsWith("multiplayer.disconnect.outdated_server")) {
-                    return new net.minecraft.network.login.server.SPacketDisconnect(new TextComponentString(CustomMessages.OUTDATED_SERVER));
+                    return new net.minecraft.network.login.server.SDisconnectLoginPacket(new StringTextComponent(CustomMessagesConfig.instance().messages.outdatedServerKick));
                 }
                 if (tct.getKey().startsWith("multiplayer.disconnect.outdated_client")) {
-                    return new net.minecraft.network.login.server.SPacketDisconnect(new TextComponentString(CustomMessages.OUTDATED_CLIENT));
+                    return new net.minecraft.network.login.server.SDisconnectLoginPacket(new StringTextComponent(CustomMessagesConfig.instance().messages.outdatedClientKick));
                 }
             }
 
         }
-        if (packetIn instanceof net.minecraft.network.play.server.SPacketDisconnect) {
-            final net.minecraft.network.play.server.SPacketDisconnect p = (net.minecraft.network.play.server.SPacketDisconnect) packetIn;
-            if (ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SPacketDisconnect.class, p, "reason", "field_149167_a", "a") instanceof TextComponentTranslation) {
-                final TextComponentTranslation tct = ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SPacketDisconnect.class, p, "reason", "field_149167_a", "a");
-                System.out.println(tct.getKey());
+        if (packetIn instanceof net.minecraft.network.play.server.SDisconnectPacket) {
+            final net.minecraft.network.play.server.SDisconnectPacket p = (net.minecraft.network.play.server.SDisconnectPacket) packetIn;
+            if (ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SDisconnectPacket.class, p, "field_149167_a") instanceof TranslationTextComponent) {
+                final TranslationTextComponent tct = ObfuscationReflectionHelper.getPrivateValue(net.minecraft.network.play.server.SDisconnectPacket.class, p, "field_149167_a");
                 if (tct.getKey().startsWith("multiplayer.disconnect.server_shutdown")) {
-                    return new net.minecraft.network.play.server.SPacketDisconnect(new TextComponentString(CustomMessages.STOP_MSG));
+                    return new net.minecraft.network.play.server.SDisconnectPacket(new StringTextComponent(CustomMessagesConfig.instance().messages.serverStoppedMessage));
                 }
                 if (tct.getKey().startsWith("disconnect.spam")) {
-                    return new SPacketDisconnect(new TextComponentString(CustomMessages.KICK_SPAM));
+                    return new SDisconnectPacket(new StringTextComponent(CustomMessagesConfig.instance().messages.spamKick));
                 }
                 if (tct.getKey().startsWith("multiplayer.disconnect.idling")) {
-                    return new SPacketDisconnect(new TextComponentString(CustomMessages.KICK_AFK));
+                    return new SDisconnectPacket(new StringTextComponent(CustomMessagesConfig.instance().messages.idleTimeoutKick));
                 }
             }
         }
@@ -77,16 +76,16 @@ public abstract class MixinNetworkManager {
     }
 
     @Shadow
-    protected abstract void dispatchPacket(Packet<?> inPacket, @Nullable GenericFutureListener<? extends Future<? super Void>>[] futureListeners);
+    protected abstract void dispatchPacket(IPacket<?> inPacket, @Nullable GenericFutureListener<? extends Future<? super Void>> futureListeners);
 
-    @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;dispatchPacket(Lnet/minecraft/network/Packet;[Lio/netty/util/concurrent/GenericFutureListener;)V"))
-    private void send(NetworkManager networkManager, Packet<?> packetIn, GenericFutureListener<? extends Future<? super Void>>[] futureListeners) {
+    @Redirect(method = "sendPacket(Lnet/minecraft/network/IPacket;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/IPacket;Lio/netty/util/concurrent/GenericFutureListener;)V"))
+    private void send(NetworkManager networkManager, IPacket<?> packetIn, GenericFutureListener<? extends Future<? super Void>> p_201058_2_) {
         packetIn = modifyPacket(packetIn);
-        dispatchPacket(packetIn, futureListeners);
+        dispatchPacket(packetIn, p_201058_2_);
     }
 
-    @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;[Lio/netty/util/concurrent/GenericFutureListener;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;dispatchPacket(Lnet/minecraft/network/Packet;[Lio/netty/util/concurrent/GenericFutureListener;)V"))
-    private void send2(NetworkManager networkManager, Packet<?> packetIn, GenericFutureListener<? extends Future<? super Void>>[] futureListeners) {
+    @Redirect(method = "sendPacket(Lnet/minecraft/network/IPacket;Lio/netty/util/concurrent/GenericFutureListener;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;dispatchPacket(Lnet/minecraft/network/IPacket;Lio/netty/util/concurrent/GenericFutureListener;)V"))
+    private void send2(NetworkManager networkManager, IPacket<?> packetIn, GenericFutureListener<? extends Future<? super Void>> futureListeners) {
         packetIn = modifyPacket(packetIn);
         dispatchPacket(packetIn, futureListeners);
     }
