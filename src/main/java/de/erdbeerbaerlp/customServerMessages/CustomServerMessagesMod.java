@@ -23,7 +23,7 @@ import java.util.ArrayList;
 public class CustomServerMessagesMod {
     public static final String MODID = "servermsgs";
     public static final String NAME = "Custom Server Messages";
-    public static final String VERSION = "4.0.0";
+    public static final String VERSION = "4.0.1";
     /**
      * File for storing the last time the server needed to start up
      */
