@@ -3,7 +3,7 @@ package de.erdbeerbaerlp.customServerMessages;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -99,7 +99,7 @@ public class CustomServerMessagesMod {
 	}
 
 	public static String getOverworldTime(boolean colored) {
-        final long overworldTicks = ServerLifecycleHooks.getCurrentServer().getWorld(DimensionType.OVERWORLD).getGameTime();
+        final long overworldTicks = ServerLifecycleHooks.getCurrentServer().getWorld(World.field_234918_g_).getGameTime();
         final long ticksThisDay = overworldTicks % 24000;
         int hours = ((int) (ticksThisDay / 1000) + 6);
         if (hours >= 24)
@@ -107,7 +107,7 @@ public class CustomServerMessagesMod {
         int minutes = (int) ((ticksThisDay % 1000) * 3 / 50);
         String out = (hours < 10 ? "0" : "") + hours + ":" + (minutes < 10 ? "0" : "") + minutes;
         if (colored) {
-            out = (ServerLifecycleHooks.getCurrentServer().getWorld(DimensionType.OVERWORLD).isDaytime() ? TextFormatting.GREEN : TextFormatting.RED) + out;
+            out = (ServerLifecycleHooks.getCurrentServer().getWorld(World.field_234918_g_).isDaytime() ? TextFormatting.GREEN : TextFormatting.RED) + out;
         }
         return out;
     }

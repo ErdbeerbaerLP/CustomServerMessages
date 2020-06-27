@@ -8,10 +8,8 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.network.play.server.SDisconnectPacket;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.*;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,19 +26,19 @@ public abstract class MixinNetworkManager {
             final SChatPacket msg = (SChatPacket) packetIn;
             final ITextComponent com = ObfuscationReflectionHelper.getPrivateValue(SChatPacket.class, msg, "field_148919_a");
             if (com instanceof TranslationTextComponent) {
-                final TranslationTextComponent tct = (TranslationTextComponent) com.setStyle(new Style());
-                final String player = tct.getFormattedText().split(" ")[0];
+                final TranslationTextComponent tct = (TranslationTextComponent) TextComponentUtils.func_240648_a_((IFormattableTextComponent) com, Style.field_240709_b_);
+                final String player = tct.toString().split(" ")[0];
                 boolean timeout = CustomServerMessagesMod.playersTimedOut.contains(player);
                 if (timeout) CustomServerMessagesMod.playersTimedOut.remove(player);
                 if (tct.getKey().startsWith("multiplayer.player.left")) {
                     final StringTextComponent leaveMsg = new StringTextComponent((timeout ? CustomMessagesConfig.instance().messages.timeoutLeaveMessage : CustomMessagesConfig.instance().messages.leaveMessage).replace("%player%", player));
-                    leaveMsg.setStyle(tct.getStyle());
-                    return new SChatPacket(leaveMsg, msg.getType());
+                    TextComponentUtils.func_240648_a_(leaveMsg, tct.getStyle());
+                    return new SChatPacket(leaveMsg, msg.getType(), Util.field_240973_b_);
                 }
                 if (tct.getKey().startsWith("multiplayer.player.joined")) {
                     final StringTextComponent joinMsg = new StringTextComponent(CustomMessagesConfig.instance().messages.joinMessage.replace("%player%", player));
-                    joinMsg.setStyle(tct.getStyle());
-                    return new SChatPacket(joinMsg, msg.getType());
+                    TextComponentUtils.func_240648_a_(joinMsg, tct.getStyle());
+                    return new SChatPacket(joinMsg, msg.getType(), Util.field_240973_b_);
                 }
             }
         }

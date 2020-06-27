@@ -50,7 +50,8 @@ configurations {
     compile.extendsFrom(embed)
 }
 minecraft {
-    mappings channel: 'snapshot', version: '20200612-1.15.1'
+    mappings channel: 'snapshot', version: '20200514-1.16'
+
     //accessTransformer = file('build/resources/main/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
@@ -96,13 +97,13 @@ reobf {
     }
 }
 shadowJar {
-    classifier = '1.15'
+    classifier = '1.16'
     configurations = [project.configurations.embed]
     relocate "com.google", "csmshadow.com.google"
     relocate "com.moandjiezana", "csmshadow.com.moandjiezana"
 }
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.15.2-31.2.9'
+    minecraft 'net.minecraftforge:forge:1.16.1-32.0.23'
     compile("org.spongepowered:mixin:0.8-SNAPSHOT") {
         transitive = false
     }
@@ -113,7 +114,7 @@ mixin {
     add sourceSets.main, 'mixins.customservermsgs.refmap.json'
 }
 jar {
-    classifier = "1.15"
+    classifier = "1.16"
     manifest {
         attributes([
                 'Maven-Artifact'          : "${project.group}:${project.archivesBaseName}:${project.version}",
@@ -137,9 +138,9 @@ curseforge {
             id = '301614'
             changelog = project.changelog
             releaseType = 'beta'
-            addGameVersion '1.15.2'
+            addGameVersion '1.16.1'
             mainArtifact(jar) {
-                displayName = "CustomServerMessages-$version (MC 1.15)"
+                displayName = "CustomServerMessages-$version (MC 1.16)"
             }
             relations {
                 requiredDependency 'mixinbootstrap'

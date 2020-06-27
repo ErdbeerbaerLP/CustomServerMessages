@@ -17,6 +17,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.storage.SaveFormat;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -113,13 +115,13 @@ public class MixinServerHandshakeNetHandler {
         }
         return true;
     }
-
     private void addServerIcon(ServerStatusResponse response) {
         File file1 = new File(CustomMessagesConfig.instance().general.startServerIconPath);
         if (CustomServerMessagesMod.serverStarted || !file1.exists()) {
             file1 = new File(CustomMessagesConfig.instance().general.serverIconPath);
             if (!file1.exists()) {
-                file1 = server.getActiveAnvilConverter().getFile(server.getFolderName(), "icon.png");
+                final SaveFormat.LevelSave anvilConverterForAnvilFile = ObfuscationReflectionHelper.getPrivateValue(MinecraftServer.class, server, "field_71310_m");
+                file1 = anvilConverterForAnvilFile.func_237298_f_();
             }
         }
         if (file1.isFile()) {

@@ -2,13 +2,15 @@ package de.erdbeerbaerlp.customServerMessages.mixin;
 
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
 import de.erdbeerbaerlp.customServerMessages.CustomMessagesConfig;
 import de.erdbeerbaerlp.customServerMessages.CustomServerMessagesMod;
-import net.minecraft.command.Commands;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.network.rcon.IServer;
+import net.minecraft.resources.DataPackRegistries;
+import net.minecraft.resources.ResourcePackInfo;
+import net.minecraft.resources.ResourcePackList;
+import net.minecraft.server.IDynamicRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerPropertiesProvider;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -16,6 +18,8 @@ import net.minecraft.server.dedicated.ServerProperties;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.CryptManager;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
+import net.minecraft.world.storage.IServerConfiguration;
+import net.minecraft.world.storage.SaveFormat;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.fml.server.ServerModLoader;
@@ -27,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -48,9 +51,10 @@ public abstract class MixinDedServer extends MinecraftServer implements IServer 
     @Final
     private ServerPropertiesProvider settings;
 
-    public MixinDedServer(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn, Commands p_i50590_4_, YggdrasilAuthenticationService p_i50590_5_, MinecraftSessionService p_i50590_6_, GameProfileRepository p_i50590_7_, PlayerProfileCache p_i50590_8_, IChunkStatusListenerFactory p_i50590_9_, String p_i50590_10_) {
-        super(p_i50590_1_, p_i50590_2_, dataFixerIn, p_i50590_4_, p_i50590_5_, p_i50590_6_, p_i50590_7_, p_i50590_8_, p_i50590_9_, p_i50590_10_);
+    public MixinDedServer(Thread p_i232576_1_, IDynamicRegistries.Impl p_i232576_2_, SaveFormat.LevelSave p_i232576_3_, IServerConfiguration p_i232576_4_, ResourcePackList<ResourcePackInfo> p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_, DataPackRegistries p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_, PlayerProfileCache p_i232576_11_, IChunkStatusListenerFactory p_i232576_12_) {
+        super(p_i232576_1_, p_i232576_2_, p_i232576_3_, p_i232576_4_, p_i232576_5_, p_i232576_6_, p_i232576_7_, p_i232576_8_, p_i232576_9_, p_i232576_10_, p_i232576_11_, p_i232576_12_);
     }
+
 
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/server/ServerModLoader;begin(Lnet/minecraft/server/dedicated/DedicatedServer;)V"), remap = false)
     private void begin(final DedicatedServer dedicatedServer) {
