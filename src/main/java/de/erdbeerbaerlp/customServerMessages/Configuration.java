@@ -4,19 +4,20 @@ import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlComment;
 import com.moandjiezana.toml.TomlIgnore;
 import com.moandjiezana.toml.TomlWriter;
+import net.minecraft.SharedConstants;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-public class CustomMessagesConfig {
+public class Configuration {
     private static final Random r = new Random();
     private static final File configFile = new File("./config/CustomMessages.toml");
     @TomlIgnore
-    private static CustomMessagesConfig INSTANCE;
+    private static Configuration INSTANCE;
 
     static {
-        INSTANCE = new CustomMessagesConfig();
+        INSTANCE = new Configuration();
         INSTANCE.loadConfig();
     }
 
@@ -25,26 +26,26 @@ public class CustomMessagesConfig {
     @TomlComment({"These messages are visible to all players",
             "",
             "Any messages supports color codes",
-            "More info about color codes here: http://bit.ly/mcformatting",
+            "More info about color codes here: https://bit.ly/mcformatting",
             "Use \\n for an new line, \u00a7k for unreadable text, \u00a7l for bold text, \u00a7m for strikethrough,",
             "\u00a7n for underlined text, \u00a7o for italics and \u00a7r to reset all formatting"})
     public Messages messages = new Messages();
     @TomlComment({"Useful to debug the mod",
-            "These should be disabled after done using it"})
+            "These should be disabled after use"})
     public Dev dev = new Dev();
 
 
-    public static CustomMessagesConfig instance() {
+    public static Configuration instance() {
         return INSTANCE;
     }
 
     public void loadConfig() {
         if (!configFile.exists()) {
-            INSTANCE = new CustomMessagesConfig();
+            INSTANCE = new Configuration();
             INSTANCE.saveConfig();
             return;
         }
-        INSTANCE = new Toml().read(configFile).to(CustomMessagesConfig.class);
+        INSTANCE = new Toml().read(configFile).to(Configuration.class);
         INSTANCE.saveConfig(); //Re-write the config so new values get added after updates
     }
 
@@ -127,7 +128,7 @@ public class CustomMessagesConfig {
                 "%max% - Maximum player count",
                 "%time% - Time in the Overworld",
                 "%time-colored% - Time in the Overworld, Green while day, Red while night"})
-        public String[] customMOTDs = new String[]{"\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 players playing on YOURSERVER\n\u00A73Join them now", "\u00A75Join our discord server:\n\u00A75discord.gg/example", "Another random MOTD\nReplace them in config/CustomMessages.cfg"};
+        public String[] customMOTDs = new String[]{"\u00A7a%online%\u00A76/\u00A7c%max%\u00A76 players playing on YOURSERVER\n\u00A73Join them now", "\u00A75Join our discord server:\n\u00A75discord.gg/example", "Another random MOTD\nReplace them in config/CustomMessages.toml"};
         @TomlComment({"Text used for the custom version",
                 "",
                 "Placeholders:",
@@ -145,11 +146,11 @@ public class CustomMessagesConfig {
                 "%time-colored% - Time in the Overworld, Green while day, Red while night"})
         public String customMOTDPlayerListHover = "\u00A76Welcome to YOURSERVER!\n\u00A73There are \u00A7a%online%\u00A73 players online.\nWorld time: %time-colored%\n\n\u00A7aOnline:\n\u00A72%playerlist%\n\u00A79\u00A7lHave Fun!";
         @TomlComment({"Message shown to players joining with newer Minecraft versions",
-                "Vanilla: Outdated server! I'm still on  1.15.2"})
-        public String outdatedServerKick = "Coming from the future? We are still using Minecraft 1.15.2";
+                "Vanilla: Outdated server! I'm still on "+ SharedConstants.VERSION_STRING})
+        public String outdatedServerKick = "Coming from the future? We are still using Minecraft "+ SharedConstants.VERSION_STRING;
         @TomlComment({"Message shown to players joining with older Minecraft versions",
-                "Vanilla: Outdated client! Please use 1.15.2"})
-        public String outdatedClientKick = "Your client is too old. Use 1.15.2";
+                "Vanilla: Outdated client! Please use "+ SharedConstants.VERSION_STRING})
+        public String outdatedClientKick = "Your client is too old. Use "+ SharedConstants.VERSION_STRING;
         @TomlComment({"Kick message shown to spamming players",
                 "Does not modify other mods's messages, only the vanilla one"})
         public String spamKick = "Please do not spam!";
